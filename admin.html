@@ -41,8 +41,8 @@
       <ol class="setup-steps">
         <li>Creá un proyecto gratuito en <strong>supabase.com</strong>.</li>
         <li>Abrí <strong>SQL Editor</strong>, pegá el contenido de <code>supabase-setup.sql</code> y ejecutalo.</li>
-        <li>En <strong>Authentication → Users → Add user</strong> creá el email y contraseña docente.</li>
-        <li>Copiá debajo tu <strong>Project URL</strong> y <strong>anon public key</strong> (de <em>Project Settings → API</em>).</li>
+        <li>Para cambiar el número de acceso docente si lo necesitás, editá la función de acceso en el SQL.</li>
+        <li>Copiá debajo tu <strong>Project URL</strong> y <strong>Publishable / anon key</strong> (de <em>Project Settings → API</em>).</li>
       </ol>
       <form id="setupForm" class="form-grid cols-2">
         <div class="campo">
@@ -63,18 +63,14 @@
 
     <!-- ================= LOGIN DOCENTE ================= -->
     <section class="panel-card" id="loginCard" hidden>
-      <h2>Iniciar sesión docente</h2>
-      <p class="panel-lead">Ingresá con el usuario creado en Supabase Authentication para subir, editar o borrar obras.</p>
-      <form id="loginForm" class="form-grid cols-2">
-        <div class="campo">
-          <label for="loginEmail">Correo electrónico</label>
-          <input type="email" id="loginEmail" required autocomplete="email" placeholder="docente@escuela.edu.ar" />
+      <h2>Ingreso docente</h2>
+      <p class="panel-lead">Ingresá el número de acceso docente para subir fotos, editar obras y gestionar los textos de la muestra.</p>
+      <form id="loginForm" class="form-grid">
+        <div class="campo" style="max-width: 340px;">
+          <label for="loginPin">Número de acceso</label>
+          <input type="password" id="loginPin" inputmode="numeric" pattern="[0-9]*" maxlength="24" required autocomplete="one-time-code" placeholder="Ingresá el número" />
         </div>
-        <div class="campo">
-          <label for="loginPass">Contraseña</label>
-          <input type="password" id="loginPass" required autocomplete="current-password" placeholder="Tu contraseña" />
-        </div>
-        <div class="btn-row" style="grid-column: 1 / -1; margin-top: 0;">
+        <div class="btn-row" style="margin-top: 0;">
           <button type="submit" class="btn btn-primary" id="btnLoginSubmit">Entrar al panel</button>
         </div>
       </form>

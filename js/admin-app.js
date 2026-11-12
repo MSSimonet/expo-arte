@@ -26,8 +26,7 @@
     btnClearOverride: document.getElementById('btnClearOverride'),
     loginCard: document.getElementById('loginCard'),
     loginForm: document.getElementById('loginForm'),
-    loginEmail: document.getElementById('loginEmail'),
-    loginPass: document.getElementById('loginPass'),
+    loginPin: document.getElementById('loginPin'),
     btnLoginSubmit: document.getElementById('btnLoginSubmit'),
     workspace: document.getElementById('workspace'),
     tabObrasBtn: document.getElementById('tabObrasBtn'),
@@ -350,12 +349,13 @@
       e.preventDefault();
       els.btnLoginSubmit.disabled = true;
       try {
-        state.session = await global.ExpoStore.signIn(els.loginEmail.value.trim(), els.loginPass.value);
+        state.session = await global.ExpoStore.signInWithPin(els.loginPin.value.trim());
+        els.loginPin.value = '';
         renderHeaderAndGate();
         await reloadData();
         showToast('¡Bienvenida al panel!');
       } catch (err) {
-        showToast(err && err.message ? err.message : 'Correo o contraseña incorrectos.', true);
+        showToast(err && err.message ? err.message : 'Número de acceso incorrecto.', true);
       } finally {
         els.btnLoginSubmit.disabled = false;
       }

@@ -7,6 +7,7 @@
 
   var KEYS = {
     LIKED: 'expo_liked_obras_v1',
+    DOCENTE_PIN: 'expo_docente_pin_v1',
     DEMO_OBRAS: 'expo_demo_obras_v1',
     DEMO_MENSAJES: 'expo_demo_mensajes_v1',
     DEMO_SALAS: 'expo_demo_salas_v1'
@@ -15,19 +16,48 @@
   var _client = null;
   var _clientSignature = '';
 
+  function getStoredPin() {
+    try {
+      return global.localStorage.getItem(KEYS.DOCENTE_PIN) || '';
+    } catch (_) {
+      return '';
+    }
+  }
+
+  function setStoredPin(pin) {
+    try {
+      if (pin) {
+        global.localStorage.setItem(KEYS.DOCENTE_PIN, pin);
+      } else {
+        global.localStorage.removeItem(KEYS.DOCENTE_PIN);
+      }
+    } catch (_) {}
+    _client = null;
+    _clientSignature = '';
+  }
+
   function getClient() {
     var creds = global.getSupabaseCredentials();
     if (!creds.valid || !global.supabase || !global.supabase.createClient) {
       return null;
     }
-    var sig = creds.url + '|' + creds.key;
+    var pin = getStoredPin();
+    var sig = creds.url + '|' + creds.key + '|' + pin;
     if (!_client || _clientSignature !== sig) {
-      _client = global.supabase.createClient(creds.url, creds.key, {
+      var opts = {
         auth: {
           persistSession: true,
           autoRefreshToken: true
         }
-      });
+      };
+      if (pin) {
+        opts.global = {
+          headers: {
+            'x-docente-pin': pin
+          }
+        };
+      }
+      _client = global.supabase.createClient(creds.url, creds.key, opts);
       _clientSignature = sig;
     }
     return _client;
@@ -437,9 +467,32 @@
   }
 
   /* ---------- Autenticación de docentes ---------- */
+  async function checkPinRemote(sb, pin) {
+    var res = await sb.rpc('verificar_pin_docente', { p_pin: pin });
+    if (res.error) {
+      if (res.error.code === 'PGRST202' || String(res.error.message || '').indexOf('verificar_pin_docente') !== -1) {
+        throw new Error('Falta ejecutar supabase-pin-update.sql en el SQL Editor de Supabase para habilitar el código de acceso.');
+      }
+      throw res.error;
+    }
+    return res.data === true;
+  }
+
   async function getSession() {
     var sb = getClient();
     if (!sb) return null;
+
+    var pin = getStoredPin();
+    if (pin) {
+      try {
+        var ok = await checkPinRemote(sb, pin);
+        if (ok) {
+          return { pinVerified: true, user: { email: 'Docente autorizado' } };
+        }
+      } catch (_) {}
+      setStoredPin('');
+    }
+
     var res = await sb.auth.getSession();
     if (res.error) throw res.error;
     return res.data.session || null;
@@ -453,10 +506,30 @@
     return res.data.session;
   }
 
+  async function signInWithPin(pin) {
+    var cleanPin = String(pin || '').trim();
+    if (!cleanPin) {
+      throw new Error('Ingresá el número de acceso docente.');
+    }
+    var sb = getClient();
+    if (!sb) throw new Error('Supabase aún no está configurado.');
+
+    var ok = await checkPinRemote(sb, cleanPin);
+    if (!ok) {
+      throw new Error('Número incorrecto. Verificá el código e intentá de nuevo.');
+    }
+
+    setStoredPin(cleanPin);
+    return { pinVerified: true, user: { email: 'Docente autorizado' } };
+  }
+
   async function signOut() {
     var sb = getClient();
+    setStoredPin('');
     if (!sb) return;
-    await sb.auth.signOut();
+    try {
+      await sb.auth.signOut();
+    } catch (_) {}
   }
 
   function resetDemoData() {
@@ -484,6 +557,7 @@
     deleteMensaje: deleteMensaje,
     getSession: getSession,
     signIn: signIn,
+    signInWithPin: signInWithPin,
     signOut: signOut,
     resetDemoData: resetDemoData
   };
