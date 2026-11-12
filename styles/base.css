@@ -3,6 +3,8 @@
    ========================================================================== */
 :root {
   color-scheme: light dark;
+
+  /* ---------- Neutros ---------- */
   --ink: #17232d;
   --ink-soft: #364958;
   --ink-mute: #516575;
@@ -11,29 +13,98 @@
   --surface-alt: #f0ebe0;
   --page: #f7f3eb;
   --line: #dfd6c3;
+  --line-strong: #cbbfa6;
+  --bar-bg: rgba(247, 243, 235, 0.98);
+  --input-bg: #ffffff;
+  --tape: rgba(255, 229, 138, 0.84);
+
+  /* ---------- Marca ---------- */
   --pine: #14532f;
   --pine-hover: #0e4023;
   --pine-dark: #0c3520;
+  --pine-soft: #e3ece6;
   --coral: #d92e25;
+  --coral-ink: #b3211a;
   --coral-soft: rgba(217, 46, 37, 0.11);
   --sun: #ffc21f;
-  --bar-bg: rgba(247, 243, 235, 0.94);
-  --input-bg: #ffffff;
-  --tape: rgba(255, 229, 138, 0.84);
-  --shadow-sm: 0 2px 8px rgba(23, 35, 45, 0.08);
-  --shadow-card: 0 6px 18px rgba(23, 35, 45, 0.09);
-  --shadow-lift: 0 14px 32px rgba(23, 35, 45, 0.16);
-  --radius-card: 14px;
-  --radius-sm: 10px;
-  --font-display: "Baloo 2", "Nunito", system-ui, sans-serif;
-  --font-body: "Nunito", system-ui, -apple-system, sans-serif;
+  --focus-ring: #17232d;
 
-  /* Colores por sala (1° a 7°) */
-  --g1: #12a5b4; --g2: #7c5cd6; --g3: #2e7cd6; --g4: #1e9e57;
-  --g5: #ef8a17; --g6: #df3e7c; --g7: #2b3a9e;
-  --gd1: #076b7a; --gd2: #5b3ec2; --gd3: #1a5da8; --gd4: #0f6b35;
-  --gd5: #9a5500; --gd6: #b81e5a; --gd7: #232f7d;
+  /* ---------- Colores por grado ----------
+     Base = color_dark de cada sala (mismo valor que en Supabase y config.js).
+     --sala-N       fondo sólido; texto blanco encima (AA ≥ 5.7:1)
+     --sala-N-soft  tinte claro para fondos; --sala-N-ink encima (AA ≥ 4.8:1)
+     --sala-N-ink   color de texto/acento sobre superficies de la página
+     --sala-N-vivid tono vivo decorativo (cabeceras con cartel de papel) */
+  --sala-1: #076b7a; --sala-1-soft: #e1edef; --sala-1-ink: #076b7a; --sala-1-vivid: #12a5b4;
+  --sala-2: #5b3ec2; --sala-2-soft: #ebe8f8; --sala-2-ink: #5b3ec2; --sala-2-vivid: #7c5cd6;
+  --sala-3: #1a5da8; --sala-3-soft: #e4ecf5; --sala-3-ink: #1a5da8; --sala-3-vivid: #2e7cd6;
+  --sala-4: #0f6b35; --sala-4-soft: #e2ede7; --sala-4-ink: #0f6b35; --sala-4-vivid: #1e9e57;
+  --sala-5: #9a5500; --sala-5-soft: #f3ebe0; --sala-5-ink: #9a5500; --sala-5-vivid: #ef8a17;
+  --sala-6: #b81e5a; --sala-6-soft: #f6e4eb; --sala-6-ink: #b81e5a; --sala-6-vivid: #df3e7c;
+  --sala-7: #232f7d; --sala-7-soft: #e5e6ef; --sala-7-ink: #232f7d; --sala-7-vivid: #2b3a9e;
+  --sala-on: #ffffff;
+
+  /* Alias heredados (no borrar: los usa el CSS existente) */
+  --g1: var(--sala-1-vivid); --g2: var(--sala-2-vivid); --g3: var(--sala-3-vivid); --g4: var(--sala-4-vivid);
+  --g5: var(--sala-5-vivid); --g6: var(--sala-6-vivid); --g7: var(--sala-7-vivid);
+  --gd1: var(--sala-1); --gd2: var(--sala-2); --gd3: var(--sala-3); --gd4: var(--sala-4);
+  --gd5: var(--sala-5); --gd6: var(--sala-6); --gd7: var(--sala-7);
   --hero-accent: #086978;
+
+  /* Color "actual" (se redefine por sala y por body[data-sala]) */
+  --sala: var(--pine);
+  --sala-soft: var(--pine-soft);
+  --sala-ink: var(--pine);
+  --sala-vivid: #1e9e57;
+
+  /* ---------- Tipografía ---------- */
+  --font-display: "Baloo 2", ui-rounded, "Nunito", "Arial Rounded MT Bold", system-ui, sans-serif;
+  --font-body: "Nunito", ui-rounded, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --fs-xs: 0.8rem;
+  --fs-sm: 0.9rem;
+  --fs-base: 1rem;
+  --fs-md: 1.125rem;
+  --fs-lg: 1.35rem;
+  --fs-xl: clamp(1.5rem, 6vw, 2.1rem);
+  --lh-tight: 1.15;
+  --lh-body: 1.55;
+
+  /* ---------- Espaciado (base 4px) ---------- */
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 0.75rem;
+  --sp-4: 1rem;
+  --sp-5: 1.25rem;
+  --sp-6: 1.5rem;
+  --sp-8: 2rem;
+  --sp-10: 2.5rem;
+  --sp-12: 3rem;
+  --gutter: max(1rem, env(safe-area-inset-left));
+
+  /* ---------- Radios ---------- */
+  --radius-xs: 8px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-card: 14px;
+  --radius-lg: 20px;
+  --radius-pill: 999px;
+
+  /* ---------- Sombras ---------- */
+  --shadow-sm: 0 1px 2px rgba(23, 35, 45, 0.06), 0 2px 8px rgba(23, 35, 45, 0.07);
+  --shadow-card: 0 1px 3px rgba(23, 35, 45, 0.06), 0 8px 20px rgba(23, 35, 45, 0.08);
+  --shadow-lift: 0 4px 10px rgba(23, 35, 45, 0.08), 0 18px 36px rgba(23, 35, 45, 0.14);
+
+  /* ---------- Movimiento ---------- */
+  --tap: 44px;
+  --dur-fast: 120ms;
+  --dur: 200ms;
+  --dur-slow: 280ms;
+  --dur-enter: 480ms;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);      /* entradas y respuestas */
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);  /* movimiento en pantalla */
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);   /* visor */
+  --ease-float: cubic-bezier(0.45, 0, 0.55, 1);    /* vaivén continuo */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1); /* rebote suave */
 }
 
 @media (prefers-color-scheme: dark) {
@@ -45,14 +116,41 @@
     --surface-alt: #252a33;
     --page: #13161b;
     --line: #343b46;
-    --bar-bg: rgba(19, 22, 27, 0.94);
+    --line-strong: #4a5361;
+    --bar-bg: rgba(19, 22, 27, 0.98);
     --input-bg: #222730;
+    --pine-soft: #183126;
+    --coral-ink: #ff7a72;
     --coral-soft: rgba(255, 107, 99, 0.18);
+    --focus-ring: #ffc21f;
+
+    /* Grados en oscuro: el sólido no cambia (texto blanco sigue AA);
+       -soft es un tinte oscuro y -ink un tono claro (AA ≥ 4.6:1 sobre ambos fondos) */
+    --sala-1-soft: #163741; --sala-1-ink: #2aaebc;
+    --sala-2-soft: #302a56; --sala-2-ink: #a38de2;
+    --sala-3-soft: #1c334e; --sala-3-ink: #649ee1;
+    --sala-4-soft: #19372c; --sala-4-ink: #42ae72;
+    --sala-5-soft: #43311c; --sala-5-ink: #f1962e;
+    --sala-6-soft: #4c2037; --sala-6-ink: #e874a1;
+    --sala-7-soft: #1f2542; --sala-7-ink: #848dc7;
+    --sala-ink: #4cc483;
+
     --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.32);
     --shadow-card: 0 6px 20px rgba(0, 0, 0, 0.42);
     --shadow-lift: 0 14px 32px rgba(0, 0, 0, 0.56);
   }
 }
+
+/* ---------- Color del grado actual ----------
+   Cada sección .sala-N y el body marcado con data-sala="N" (llegada por QR)
+   redefinen el color "actual" para todo lo que tengan dentro. */
+.sala-1, .c1, body[data-sala="1"] { --sala: var(--sala-1); --sala-soft: var(--sala-1-soft); --sala-ink: var(--sala-1-ink); --sala-vivid: var(--sala-1-vivid); }
+.sala-2, .c2, body[data-sala="2"] { --sala: var(--sala-2); --sala-soft: var(--sala-2-soft); --sala-ink: var(--sala-2-ink); --sala-vivid: var(--sala-2-vivid); }
+.sala-3, .c3, body[data-sala="3"] { --sala: var(--sala-3); --sala-soft: var(--sala-3-soft); --sala-ink: var(--sala-3-ink); --sala-vivid: var(--sala-3-vivid); }
+.sala-4, .c4, body[data-sala="4"] { --sala: var(--sala-4); --sala-soft: var(--sala-4-soft); --sala-ink: var(--sala-4-ink); --sala-vivid: var(--sala-4-vivid); }
+.sala-5, .c5, body[data-sala="5"] { --sala: var(--sala-5); --sala-soft: var(--sala-5-soft); --sala-ink: var(--sala-5-ink); --sala-vivid: var(--sala-5-vivid); }
+.sala-6, .c6, body[data-sala="6"] { --sala: var(--sala-6); --sala-soft: var(--sala-6-soft); --sala-ink: var(--sala-6-ink); --sala-vivid: var(--sala-6-vivid); }
+.sala-7, .c7, body[data-sala="7"] { --sala: var(--sala-7); --sala-soft: var(--sala-7-soft); --sala-ink: var(--sala-7-ink); --sala-vivid: var(--sala-7-vivid); }
 
 *, *::before, *::after {
   box-sizing: border-box;
@@ -72,8 +170,10 @@ html {
   html { scroll-behavior: auto; }
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
   }
 }
 
@@ -87,8 +187,8 @@ body {
   background: var(--page);
   color: var(--ink);
   font-family: var(--font-body);
-  font-size: 16px;
-  line-height: 1.55;
+  font-size: var(--fs-base);
+  line-height: var(--lh-body);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
   overscroll-behavior-y: none;
@@ -106,11 +206,12 @@ button, a, input, select, textarea {
 h1, h2, h3, .display {
   font-family: var(--font-display);
   letter-spacing: -0.015em;
+  line-height: var(--lh-tight);
   text-wrap: balance;
 }
 
 :focus-visible {
-  outline: 3px solid var(--sun);
+  outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
@@ -135,9 +236,10 @@ h1, h2, h3, .display {
   font-family: var(--font-display);
   font-weight: 800;
   font-size: 0.98rem;
-  border-radius: 999px;
-  padding: 0.58rem 1.15rem;
-  min-height: 44px;
+  line-height: 1.2;
+  border-radius: var(--radius-pill);
+  padding: 0.6rem 1.2rem;
+  min-height: var(--tap);
   cursor: pointer;
   border: 1.5px solid var(--line);
   background: var(--surface);
@@ -145,16 +247,25 @@ h1, h2, h3, .display {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.45rem;
+  gap: var(--sp-2);
   text-decoration: none;
-  transition: transform 0.16s ease, background-color 0.16s ease, box-shadow 0.16s ease;
+  user-select: none;
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    background-color var(--dur) ease,
+    border-color var(--dur) ease,
+    box-shadow var(--dur) ease;
 }
-.btn:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
+@media (hover: hover) {
+  .btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+    border-color: var(--line-strong);
+  }
 }
 .btn:active:not(:disabled) {
-  transform: translateY(0);
+  transform: scale(0.97);
+  box-shadow: none;
 }
 .btn:disabled {
   opacity: 0.55;
@@ -166,17 +277,24 @@ h1, h2, h3, .display {
   flex: 0 0 auto;
 }
 .btn-primary {
-  background: var(--pine);
-  border-color: var(--pine);
-  color: #ffffff;
+  background: var(--sala);
+  border-color: var(--sala);
+  color: var(--sala-on);
 }
-.btn-primary:hover:not(:disabled) {
-  background: var(--pine-hover);
+@media (hover: hover) {
+  .btn-primary:hover:not(:disabled) {
+    background: var(--pine-hover);
+    background: color-mix(in srgb, var(--sala) 84%, #000000);
+    border-color: transparent;
+  }
 }
 .btn-wa {
   background: #127a3a;
   border-color: #0e632f;
   color: #ffffff;
+}
+@media (hover: hover) {
+  .btn-wa:hover:not(:disabled) { background: #0e632f; border-color: #0e632f; }
 }
 .btn-danger {
   background: var(--coral);
@@ -188,9 +306,66 @@ h1, h2, h3, .display {
   border-color: transparent;
   color: var(--ink-soft);
 }
-.btn-ghost:hover:not(:disabled) {
-  background: var(--surface-alt);
-  box-shadow: none;
+@media (hover: hover) {
+  .btn-ghost:hover:not(:disabled) {
+    background: var(--surface-alt);
+    border-color: transparent;
+    box-shadow: none;
+  }
+}
+.btn-sun {
+  background: var(--sun);
+  border-color: var(--sun);
+  color: #17232d;
+}
+@media (hover: hover) {
+  .btn-sun:hover:not(:disabled) { background: #f5b400; border-color: #f5b400; }
+}
+
+/* ---------- Campos de formulario (compartidos por muestra y panel) ---------- */
+.campo label {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.94rem;
+  margin-bottom: var(--sp-1);
+  color: var(--ink);
+}
+.campo input,
+.campo select,
+.campo textarea {
+  width: 100%;
+  font-size: 16px;
+  min-height: 48px;
+  padding: 0.6rem 0.85rem;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--input-bg);
+  color: var(--ink);
+  transition: border-color var(--dur) ease, box-shadow var(--dur) ease;
+}
+.campo input::placeholder,
+.campo textarea::placeholder {
+  color: var(--ink-mute);
+  opacity: 0.85;
+}
+.campo input:focus,
+.campo select:focus,
+.campo textarea:focus {
+  outline: none;
+  border-color: var(--sala-ink);
+  box-shadow: 0 0 0 3px var(--sala-soft);
+}
+.campo input:focus-visible,
+.campo select:focus-visible,
+.campo textarea:focus-visible {
+  outline: 2px solid var(--sala-ink);
+  outline-offset: 1px;
+}
+.campo textarea {
+  min-height: 92px;
+  resize: vertical;
+  line-height: 1.45;
 }
 
 /* ---------- Toast ---------- */
@@ -202,14 +377,14 @@ h1, h2, h3, .display {
   z-index: 120;
   background: #17232d;
   color: #ffffff;
-  padding: 0.72rem 1.2rem;
-  border-radius: 999px;
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--radius-pill);
   font-weight: 700;
   font-size: 0.94rem;
   box-shadow: var(--shadow-lift);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition: opacity var(--dur) ease, transform var(--dur) var(--ease-out);
   max-width: calc(100vw - 2rem);
   text-align: center;
 }

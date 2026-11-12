@@ -112,6 +112,7 @@
   }
 
   function updateQrArrivalBanner() {
+    state.qrSalaId ? document.body.setAttribute('data-sala', state.qrSalaId) : document.body.removeAttribute('data-sala');
     if (!state.qrSalaId) {
       els.qrArrival.hidden = true;
       els.hero.classList.remove('compacto');

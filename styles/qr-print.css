@@ -7,6 +7,7 @@
 }
 
 .qr-toolbar {
+  --focus-ring: var(--sun); /* anillo de foco visible sobre fondo oscuro */
   background: var(--pine-dark);
   color: #ffffff;
   padding: 1rem max(1rem, env(safe-area-inset-right)) 1.15rem max(1rem, env(safe-area-inset-left));
@@ -132,7 +133,7 @@
   print-color-adjust: exact;
 }
 .qr-poster-band {
-  background: var(--poster-color, #14532f);
+  background: var(--poster-color, var(--pine));
   color: #ffffff;
   padding: 1.1rem 1.2rem 1rem;
   -webkit-print-color-adjust: exact;
@@ -165,7 +166,7 @@
   font-weight: 800;
   font-size: clamp(2.1rem, 5vw, 3rem);
   line-height: 1;
-  color: var(--poster-color, #14532f);
+  color: var(--poster-color, var(--pine));
   text-transform: uppercase;
 }
 .qr-poster-shift {
@@ -215,7 +216,7 @@
   font-family: var(--font-display);
   font-weight: 800;
   font-size: 0.92rem;
-  color: #14532f;
+  color: var(--pine);
 }
 .qr-poster-actions {
   display: flex;

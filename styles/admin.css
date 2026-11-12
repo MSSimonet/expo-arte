@@ -2,6 +2,7 @@
    Estilos del Panel Docente (Operate mode)
    ========================================================================== */
 .admin-header {
+  --focus-ring: var(--sun); /* anillo de foco visible sobre fondo oscuro */
   background: var(--pine-dark);
   color: #ffffff;
   padding: 0.9rem max(1rem, env(safe-area-inset-right)) 0.9rem max(1rem, env(safe-area-inset-left));
@@ -55,7 +56,7 @@
   gap: 0.45rem;
 }
 .admin-nav-links .btn {
-  min-height: 40px;
+  min-height: var(--tap);
   padding: 0.4rem 0.9rem;
   font-size: 0.9rem;
   background: rgba(255, 255, 255, 0.12);
@@ -112,28 +113,7 @@
     grid-template-columns: 1fr 1fr;
   }
 }
-.campo label {
-  display: block;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 0.94rem;
-  margin-bottom: 0.25rem;
-}
-.campo input,
-.campo select,
-.campo textarea {
-  width: 100%;
-  font-size: 16px;
-  padding: 0.55rem 0.78rem;
-  border: 1.5px solid var(--line);
-  border-radius: 10px;
-  background: var(--input-bg);
-  color: var(--ink);
-}
-.campo textarea {
-  min-height: 80px;
-  resize: vertical;
-}
+/* Los estilos de .campo están unificados en base.css */
 
 .btn-row {
   display: flex;
@@ -291,7 +271,7 @@
   margin-top: 0.55rem;
 }
 .btn-xs {
-  min-height: 36px;
+  min-height: var(--tap);
   padding: 0.25rem 0.75rem;
   font-size: 0.85rem;
 }
