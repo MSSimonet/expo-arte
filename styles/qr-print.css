@@ -1,0 +1,293 @@
+/* ==========================================================================
+   Estilos de Carteles QR Listos para Imprimir (A4 / Guardar como PDF)
+   ========================================================================== */
+@page {
+  size: A4 portrait;
+  margin: 10mm;
+}
+
+.qr-toolbar {
+  background: var(--pine-dark);
+  color: #ffffff;
+  padding: 1rem max(1rem, env(safe-area-inset-right)) 1.15rem max(1rem, env(safe-area-inset-left));
+}
+.qr-toolbar-inner {
+  max-width: 1040px;
+  margin: 0 auto;
+  display: grid;
+  gap: 0.9rem;
+}
+.qr-toolbar-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+.qr-toolbar-head h1 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+.qr-toolbar-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+.qr-toolbar-links .btn {
+  min-height: 40px;
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.28);
+  color: #ffffff;
+}
+.qr-controls {
+  background: rgba(255, 255, 255, 0.09);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 14px;
+  padding: 0.95rem 1rem;
+  display: grid;
+  gap: 0.85rem;
+}
+@media (min-width: 780px) {
+  .qr-controls-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(220px, 0.9fr) auto;
+    gap: 0.85rem;
+    align-items: end;
+  }
+}
+.qr-controls label {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #e6f5eb;
+  margin-bottom: 0.25rem;
+}
+.qr-controls input[type="url"],
+.qr-controls select {
+  width: 100%;
+  font-size: 16px;
+  min-height: 44px;
+  padding: 0.5rem 0.78rem;
+  border-radius: 10px;
+  border: 1.5px solid rgba(255, 255, 255, 0.28);
+  background: #ffffff;
+  color: #17232d;
+}
+.qr-warning {
+  background: #ffd94d;
+  color: #241a00;
+  border-radius: 10px;
+  padding: 0.62rem 0.88rem;
+  font-weight: 800;
+  font-size: 0.9rem;
+}
+.qr-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem 0.95rem;
+  align-items: center;
+}
+.qr-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.qr-check input {
+  width: 18px;
+  height: 18px;
+}
+
+/* ---------- Área de carteles ---------- */
+.qr-sheet-wrap {
+  max-width: 1040px;
+  margin: 1.5rem auto 3rem;
+  padding: 0 1rem;
+  display: grid;
+  gap: 1.4rem;
+}
+.qr-sheet-wrap.layout-2up {
+  grid-template-columns: 1fr;
+}
+@media (min-width: 780px) {
+  .qr-sheet-wrap.layout-2up {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.qr-poster {
+  background: #ffffff;
+  color: #17232d;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  border: 2px solid #e4ddd0;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+.qr-poster-band {
+  background: var(--poster-color, #14532f);
+  color: #ffffff;
+  padding: 1.1rem 1.2rem 1rem;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+.qr-poster-school {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.95rem;
+  opacity: 0.95;
+}
+.qr-poster-title {
+  margin: 0.15rem 0 0;
+  font-family: var(--font-display);
+  font-size: 1.55rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  line-height: 1.05;
+}
+.qr-poster-body {
+  padding: 1.25rem 1.2rem 1.35rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+  flex: 1 1 auto;
+}
+.qr-poster-grade {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(2.1rem, 5vw, 3rem);
+  line-height: 1;
+  color: var(--poster-color, #14532f);
+  text-transform: uppercase;
+}
+.qr-poster-shift {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.02rem;
+  color: #364958;
+}
+.qr-code-box {
+  background: #ffffff;
+  border: 2px solid #e4ddd0;
+  border-radius: 16px;
+  padding: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.qr-code-box canvas,
+.qr-code-box img {
+  display: block;
+  width: 240px;
+  height: 240px;
+}
+.layout-2up .qr-code-box canvas,
+.layout-2up .qr-code-box img {
+  width: 185px;
+  height: 185px;
+}
+.qr-poster-hint {
+  margin: 0;
+  max-width: 420px;
+  font-size: 1.04rem;
+  font-weight: 700;
+  line-height: 1.4;
+  color: #17232d;
+}
+.qr-poster-url {
+  font-size: 0.82rem;
+  color: #516575;
+  word-break: break-all;
+  font-weight: 700;
+  background: #f5f2eb;
+  padding: 0.3rem 0.7rem;
+  border-radius: 8px;
+}
+.qr-poster-date {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.92rem;
+  color: #14532f;
+}
+.qr-poster-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+/* ---------- Reglas exactas de impresión ---------- */
+@media print {
+  body {
+    background: #ffffff !important;
+  }
+  .qr-toolbar,
+  .qr-poster-actions {
+    display: none !important;
+  }
+  .qr-sheet-wrap {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    display: block;
+  }
+  .qr-sheet-wrap.layout-1up .qr-poster {
+    break-after: page;
+    page-break-after: always;
+    box-shadow: none;
+    border: 2px solid #d5cebe;
+    min-height: 266mm;
+    justify-content: space-between;
+  }
+  .qr-sheet-wrap.layout-1up .qr-poster:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+  .qr-sheet-wrap.layout-1up .qr-code-box canvas,
+  .qr-sheet-wrap.layout-1up .qr-code-box img {
+    width: 105mm;
+    height: 105mm;
+  }
+  .qr-sheet-wrap.layout-1up .qr-poster-grade {
+    font-size: 38pt;
+  }
+  .qr-sheet-wrap.layout-1up .qr-poster-hint {
+    font-size: 14pt;
+    max-width: 145mm;
+  }
+
+  .qr-sheet-wrap.layout-2up {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8mm;
+  }
+  .qr-sheet-wrap.layout-2up .qr-poster {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    box-shadow: none;
+    border: 1.5px solid #d5cebe;
+    min-height: 130mm;
+  }
+  .qr-sheet-wrap.layout-2up .qr-poster:nth-child(2n) {
+    break-after: page;
+    page-break-after: always;
+  }
+  .qr-sheet-wrap.layout-2up .qr-poster:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+  .qr-sheet-wrap.layout-2up .qr-code-box canvas,
+  .qr-sheet-wrap.layout-2up .qr-code-box img {
+    width: 52mm;
+    height: 52mm;
+  }
+}

@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" content="#0b7d8e" />
+  <meta name="description" content="Muestra de arte Pequeños grandes artistas — Escuela N° 5 D.E. 13 Roberto Billinghurst." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2314532f'/%3E%3Ccircle cx='24' cy='26' r='10' fill='%23ffc21f'/%3E%3Ccircle cx='42' cy='38' r='11' fill='%23d92e25'/%3E%3C/svg%3E" />
+  <title>Pequeños grandes artistas — Escuela N° 5 D.E. 13 “Roberto Billinghurst”</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles/base.css" />
+  <link rel="stylesheet" href="styles/expo.css" />
+</head>
+<body>
+
+  <div class="demo-strip" id="demoStrip" hidden>
+    <span>Modo vista previa con obras de ejemplo.</span>
+    <a href="admin.html">Conectar Supabase y cargar fotos reales</a>
+  </div>
+
+  <!-- ================= PORTADA ================= -->
+  <header class="hero" id="inicio">
+    <div class="hero-inner">
+      <div class="paper-title">
+        <h1><span class="l1">Pequeños grandes</span><span class="l2">artistas</span></h1>
+      </div>
+      <div class="hero-meta">
+        <p class="hero-school" id="heroSchool">Exposición de arte · Escuela N° 5 D.E. 13 “Roberto Billinghurst”</p>
+        <p class="hero-sub">Los trabajos de 1° a 7° grado, sala por sala. Escaneaste el QR y ya podés recorrer la muestra en tu celular.</p>
+      </div>
+      <div class="hero-badges">
+        <span class="hero-fecha" id="heroFecha">Viernes 20 de noviembre de 2026</span>
+        <a class="hero-cta-msg" href="#mensajes">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Dejar un mensaje
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= LLEGADA DESDE QR DE UN GRADO ================= -->
+  <section class="qr-arrival" id="qrArrival" hidden aria-live="polite">
+    <div class="qr-arrival-card">
+      <div class="qr-arrival-text">
+        <span class="qr-arrival-badge" id="qrArrivalBadge">3° grado</span>
+        <div class="qr-arrival-copy">
+          <strong id="qrArrivalTitle">Estás viendo la sala de 3° grado</strong>
+          <span id="qrArrivalSubtitle">Podés recorrer los turnos A y B o elegir cualquier otro grado debajo.</span>
+        </div>
+      </div>
+      <div class="qr-arrival-actions">
+        <button type="button" class="btn" id="btnVerTodas">Ver desde 1° grado</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= BARRA FIJA: BUSCADOR + TURNO + SALAS ================= -->
+  <div class="barra">
+    <div class="barra-inner">
+      <div class="barra-top">
+        <div class="buscador">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.8-3.8"/></svg>
+          <input type="search" id="buscar" placeholder="Buscar obra por nombre del alumno o alumna…" aria-label="Buscar obra por nombre del alumno o alumna" autocomplete="off" />
+          <button type="button" class="limpiar" id="limpiar" aria-label="Limpiar búsqueda">×</button>
+        </div>
+        <div class="turno-switch" role="group" aria-label="Filtrar por turno">
+          <button type="button" class="turno-btn" data-turno-filter="ALL" aria-pressed="true">Todos</button>
+          <button type="button" class="turno-btn" data-turno-filter="A" aria-pressed="false">Mañana (A)</button>
+          <button type="button" class="turno-btn" data-turno-filter="B" aria-pressed="false">Tarde (B)</button>
+        </div>
+      </div>
+      <p class="resultado-busqueda" id="resultadoBusqueda" role="status" aria-live="polite"></p>
+      <nav class="chips" id="chipsSalas" aria-label="Ir a la sala de cada grado"></nav>
+    </div>
+  </div>
+
+  <!-- ================= GALERÍAS POR GRADO ================= -->
+  <main id="salas" aria-live="polite">
+    <div class="estado-vacio">Cargando las obras de la exposición…</div>
+  </main>
+
+  <p class="sin-resultados" id="sinResultados">
+    No encontramos obras con ese filtro. Probá borrando la búsqueda o cambiando a «Todos» en el turno.
+  </p>
+
+  <!-- ================= LIBRO DE VISITAS ================= -->
+  <section class="libro-visitas" id="mensajes" aria-labelledby="tituloMensajes">
+    <div class="libro-head">
+      <div>
+        <h2 id="tituloMensajes">Mensajes de las familias</h2>
+        <p>Dejá un saludo o felicitación para los chicos, chicas y docentes de la muestra.</p>
+      </div>
+    </div>
+
+    <div class="libro-grid">
+      <form class="msg-form" id="msgForm">
+        <div class="campo">
+          <label for="msgAutor">Tu nombre</label>
+          <input type="text" id="msgAutor" required maxlength="60" placeholder="Ej. Familia Gómez / Mamá de Sofía" autocomplete="name" />
+        </div>
+        <div class="campo">
+          <label for="msgParentesco">Vínculo o saludo corto (opcional)</label>
+          <input type="text" id="msgParentesco" maxlength="60" placeholder="Ej. Tíos de 3° A / Abuelos" />
+        </div>
+        <div class="campo">
+          <label for="msgSala">¿Para qué grado es?</label>
+          <select id="msgSala">
+            <option value="">Toda la exposición</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="msgTexto">Tu mensaje</label>
+          <textarea id="msgTexto" required maxlength="400" placeholder="¡Hermosa muestra! Qué orgullo ver los trabajos..."></textarea>
+          <div class="campo-meta">
+            <span>Se publica al instante</span>
+            <span id="msgCounter">0 / 400</span>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary" id="msgSubmit">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Publicar mensaje
+        </button>
+      </form>
+
+      <div class="msg-lista" id="msgLista">
+        <div class="estado-vacio">Cargando mensajes…</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= PIE / CRÉDITO ================= -->
+  <footer>
+    <div class="credito">
+      <video class="retrato" autoplay muted loop playsinline poster="assets/alicia-poster.png" aria-label="Retrato animado de la Prof. Alicia Correa">
+        <source src="assets/alicia-retrato.mp4" type="video/mp4" />
+      </video>
+      <p>
+        <span class="quien" id="footerOrganizer">Muestra organizada por la Prof. Alicia Correa</span><br />
+        <span id="footerRole">Docente de Plástica — los trabajos de esta exposición son el resultado de su trabajo en el aula con cada grado.</span>
+      </p>
+    </div>
+    <p class="pie-escuela" id="footerSchool">Escuela N° 5 D.E. 13 “Roberto Billinghurst” · Ciudad de Buenos Aires · Exposición: viernes 20 de noviembre de 2026</p>
+    <div class="pie-links">
+      <a href="admin.html">Panel docente (subir y editar obras)</a>
+      <a href="qr-imprimir.html">Carteles QR para imprimir</a>
+    </div>
+  </footer>
+
+  <!-- ================= VISOR / LIGHTBOX DE OBRA ================= -->
+  <div class="visor" id="visor" role="dialog" aria-modal="true" aria-label="Obra ampliada">
+    <div class="visor-marco">
+      <button type="button" class="visor-cerrar" id="vCerrar" aria-label="Cerrar visor">✕</button>
+      <div class="visor-stage">
+        <div class="visor-lienzo" id="vLienzo">
+          <img id="vImg" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'/%3E" alt="Obra ampliada" />
+        </div>
+        <button type="button" class="visor-nav prev" id="vPrev" aria-label="Obra anterior">‹</button>
+        <button type="button" class="visor-nav next" id="vNext" aria-label="Obra siguiente">›</button>
+      </div>
+
+      <div class="visor-datos">
+        <div class="v-autor" id="vAutor"></div>
+        <div class="v-titulo" id="vTitulo" hidden></div>
+        <div class="v-donde" id="vDonde"></div>
+        <p class="v-desc" id="vDesc" hidden></p>
+      </div>
+
+      <div class="visor-acciones">
+        <button type="button" class="btn" id="vLike" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          <span id="vLikeTxt">Me gusta (0)</span>
+        </button>
+        <button type="button" class="btn" id="vZoom">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.8-3.8M11 8v6M8 11h6"/></svg>
+          <span id="vZoomTxt">Acercar</span>
+        </button>
+        <button type="button" class="btn btn-primary" id="vDescargar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M4 19h16"/></svg>
+          Descargar
+        </button>
+        <a class="btn btn-wa" id="vWhatsapp" href="#" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21h.01c5.46 0 9.9-4.45 9.9-9.91A9.87 9.87 0 0 0 12.04 2zm0 18.13h-.01a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.19-.31a8.2 8.2 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.25-8.24 2.2 0 4.27.86 5.82 2.42a8.18 8.18 0 0 1 2.41 5.83c0 4.54-3.7 8.23-8.25 8.23zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.22-.08-.39-.12-.55.13-.16.24-.64.8-.78.97-.14.16-.29.18-.54.06-.25-.12-1.05-.38-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.01-.38.11-.51.11-.11.25-.29.37-.43.12-.15.16-.25.25-.41.08-.17.04-.31-.02-.43-.06-.13-.55-1.35-.8-1.6z"/></svg>
+          Compartir por WhatsApp
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="js/vendor/supabase.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/datos-demo.js"></script>
+  <script src="js/supabase-service.js"></script>
+  <script src="js/expo-app.js"></script>
+</body>
+</html>

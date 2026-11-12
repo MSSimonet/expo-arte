@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2314532f'/%3E%3Ccircle cx='24' cy='26' r='10' fill='%23ffc21f'/%3E%3Ccircle cx='42' cy='38' r='11' fill='%23d92e25'/%3E%3C/svg%3E" />
+  <title>Carteles QR para imprimir — Pequeños grandes artistas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles/base.css" />
+  <link rel="stylesheet" href="styles/qr-print.css" />
+</head>
+<body>
+
+  <header class="qr-toolbar">
+    <div class="qr-toolbar-inner">
+      <div class="qr-toolbar-head">
+        <div>
+          <h1>Carteles QR listos para imprimir</h1>
+        </div>
+        <div class="qr-toolbar-links">
+          <a class="btn" href="index.html">Ver muestra</a>
+          <a class="btn" href="admin.html">Panel docente</a>
+        </div>
+      </div>
+
+      <div class="qr-controls">
+        <div class="qr-controls-row">
+          <div>
+            <label for="qrBaseUrl">Dirección pública de la muestra (URL de GitHub Pages)</label>
+            <input type="url" id="qrBaseUrl" placeholder="https://tu-usuario.github.io/expo-arte/" />
+          </div>
+          <div>
+            <label for="qrLayout">Tamaño de impresión (A4)</label>
+            <select id="qrLayout">
+              <option value="1up">1 cartel grande por hoja A4</option>
+              <option value="2up">2 tarjetas por hoja A4</option>
+            </select>
+          </div>
+          <div>
+            <button type="button" class="btn btn-primary" id="btnPrintAll" style="background:#ffc21f; border-color:#ffc21f; color:#17232d;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+              Imprimir / Guardar PDF
+            </button>
+          </div>
+        </div>
+
+        <div class="qr-warning" id="qrLocalWarning" hidden>
+          Atención: la URL actual parece local (file:// o localhost). Antes de imprimir los carteles para el público, pegá arriba la dirección definitiva de GitHub Pages (ej. https://tu-usuario.github.io/pequenos-artistas/).
+        </div>
+
+        <div class="qr-checks" id="qrChecks"></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="qr-sheet-wrap layout-1up" id="qrSheetWrap"></main>
+
+  <script src="js/vendor/qrcode.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/qr-app.js"></script>
+</body>
+</html>
