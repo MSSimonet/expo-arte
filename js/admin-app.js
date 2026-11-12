@@ -33,7 +33,6 @@
     tabObrasBtn: document.getElementById('tabObrasBtn'),
     tabMensajesBtn: document.getElementById('tabMensajesBtn'),
     upSala: document.getElementById('upSala'),
-    upTurno: document.getElementById('upTurno'),
     inputCamera: document.getElementById('inputCamera'),
     inputGallery: document.getElementById('inputGallery'),
     queueList: document.getElementById('queueList'),
@@ -41,8 +40,6 @@
     btnUploadQueue: document.getElementById('btnUploadQueue'),
     btnClearQueue: document.getElementById('btnClearQueue'),
     admFilterSala: document.getElementById('admFilterSala'),
-    admFilterTurno: document.getElementById('admFilterTurno'),
-    admSearch: document.getElementById('admSearch'),
     admObrasList: document.getElementById('admObrasList'),
     admSalasList: document.getElementById('admSalasList'),
     admMensajesList: document.getElementById('admMensajesList'),
@@ -50,7 +47,6 @@
     editForm: document.getElementById('editForm'),
     edId: document.getElementById('edId'),
     edSala: document.getElementById('edSala'),
-    edTurno: document.getElementById('edTurno'),
     edAutor: document.getElementById('edAutor'),
     edTitulo: document.getElementById('edTitulo'),
     edDesc: document.getElementById('edDesc'),
@@ -154,8 +150,8 @@
         + '<div class="queue-top"><span>Foto ' + (idx + 1) + ' (' + mb + ' MB · se comprimirá al subir)</span>'
         + '<button type="button" class="btn btn-xs btn-ghost" data-q-remove="' + idx + '">Quitar</button></div>'
         + '<div class="form-grid cols-2">'
-        + '<div class="campo"><label>Nombre del alumno o alumna</label>'
-        + '<input type="text" data-q-field="autor" data-q-idx="' + idx + '" value="' + escapeHtml(item.autor) + '" placeholder="Vacío = Sin firma" maxlength="80" /></div>'
+        + '<div class="campo"><label>Autor/a (opcional)</label>'
+        + '<input type="text" data-q-field="autor" data-q-idx="' + idx + '" value="' + escapeHtml(item.autor) + '" placeholder="Opcional" maxlength="80" /></div>'
         + '<div class="campo"><label>Título o técnica (opcional)</label>'
         + '<input type="text" data-q-field="titulo" data-q-idx="' + idx + '" value="' + escapeHtml(item.titulo) + '" placeholder="Ej. Acuarela / Collage" maxlength="100" /></div>'
         + '</div>'
@@ -167,7 +163,6 @@
   async function processQueueUpload() {
     if (!state.queue.length) return;
     var salaId = Number(els.upSala.value);
-    var turno = els.upTurno.value;
     els.btnUploadQueue.disabled = true;
     els.btnUploadQueue.textContent = 'Subiendo 0 de ' + state.queue.length + '…';
 
@@ -180,7 +175,7 @@
       try {
         await global.ExpoStore.uploadObra({
           sala_id: salaId,
-          turno: turno,
+          turno: 'A',
           autor: item.autor,
           titulo: item.titulo,
           descripcion: item.descripcion,
@@ -209,33 +204,27 @@
   function renderObrasList() {
     els.tabObrasBtn.textContent = 'Obras cargadas (' + state.obras.length + ')';
     var salaF = els.admFilterSala.value;
-    var turnoF = els.admFilterTurno.value;
-    var q = (els.admSearch.value || '').trim().toLowerCase();
 
     var filtered = state.obras.filter(function (o) {
       if (salaF && Number(o.sala_id) !== Number(salaF)) return false;
-      if (turnoF && o.turno !== turnoF) return false;
-      if (q) {
-        var hay = ((o.autor || 'sin firma') + ' ' + (o.titulo || '')).toLowerCase();
-        if (hay.indexOf(q) === -1) return false;
-      }
       return true;
     });
 
     if (!filtered.length) {
-      els.admObrasList.innerHTML = '<div class="estado-vacio" style="grid-column:1/-1">No hay obras para mostrar con ese filtro.</div>';
+      els.admObrasList.innerHTML = '<div class="estado-vacio" style="grid-column:1/-1">No hay obras para mostrar en este grado.</div>';
       return;
     }
 
     var html = '';
     filtered.forEach(function (o) {
       var sala = state.salas.find(function (s) { return s.id === Number(o.sala_id); }) || { grado: o.sala_id + '°' };
+      var tituloCard = o.autor || o.titulo || (sala.grado + ' grado');
       html += '<article class="admin-obra-row">'
         + '<img src="' + escapeHtml(o.imagen_url) + '" alt="" loading="lazy" />'
         + '<div class="admin-obra-info">'
-        + '<strong>' + escapeHtml(o.autor || 'Sin firma') + '</strong>'
-        + '<div class="admin-obra-meta">' + escapeHtml(sala.grado + ' ' + o.turno)
-        + (o.titulo ? ' · ' + escapeHtml(o.titulo) : '')
+        + '<strong>' + escapeHtml(tituloCard) + '</strong>'
+        + '<div class="admin-obra-meta">' + escapeHtml(sala.grado + ' grado')
+        + (o.autor && o.titulo ? ' · ' + escapeHtml(o.titulo) : '')
         + ' · ' + (Number(o.likes_count) || 0) + ' me gusta</div>'
         + '<div class="admin-obra-btns">'
         + '<button type="button" class="btn btn-xs" data-edit-id="' + escapeHtml(o.id) + '">Editar</button>'
@@ -252,14 +241,11 @@
       html += '<form class="sala-editor-item" data-sala-form="' + s.id + '">'
         + '<div class="sala-editor-head">'
         + '<span class="sala-chip-dot"><i style="background:' + escapeHtml(s.color) + '"></i>' + escapeHtml(s.grado + ' grado — ' + s.nombre) + '</span>'
-        + '<button type="submit" class="btn btn-xs btn-primary">Guardar textos</button>'
+        + '<button type="submit" class="btn btn-xs btn-primary">Guardar texto</button>'
         + '</div>'
-        + '<div class="form-grid cols-2">'
-        + '<div class="campo"><label>Descripción Turno A (Mañana)</label>'
-        + '<textarea data-desc-a maxlength="260">' + escapeHtml(s.desc_a) + '</textarea></div>'
-        + '<div class="campo"><label>Descripción Turno B (Tarde)</label>'
-        + '<textarea data-desc-b maxlength="260">' + escapeHtml(s.desc_b) + '</textarea></div>'
-        + '</div></form>';
+        + '<div class="campo"><label>Descripción de la sala</label>'
+        + '<textarea data-desc-a maxlength="260">' + escapeHtml(s.desc_a || s.desc_b || '') + '</textarea></div>'
+        + '</form>';
     });
     els.admSalasList.innerHTML = html;
   }
@@ -291,12 +277,11 @@
     if (!obra) return;
     els.edId.value = obra.id;
     els.edSala.value = String(obra.sala_id);
-    els.edTurno.value = obra.turno;
     els.edAutor.value = obra.autor || '';
     els.edTitulo.value = obra.titulo || '';
     els.edDesc.value = obra.descripcion || '';
     els.editModal.classList.add('abierto');
-    els.edAutor.focus();
+    els.edTitulo.focus();
   }
 
   function closeEditModal() {
@@ -429,8 +414,6 @@
     els.btnUploadQueue.addEventListener('click', processQueueUpload);
 
     els.admFilterSala.addEventListener('change', renderObrasList);
-    els.admFilterTurno.addEventListener('change', renderObrasList);
-    els.admSearch.addEventListener('input', renderObrasList);
 
     els.admObrasList.addEventListener('click', async function (e) {
       var editBtn = e.target.closest('[data-edit-id]');
@@ -464,7 +447,7 @@
       try {
         await global.ExpoStore.updateObra(els.edId.value, {
           sala_id: els.edSala.value,
-          turno: els.edTurno.value,
+          turno: 'A',
           autor: els.edAutor.value,
           titulo: els.edTitulo.value,
           descripcion: els.edDesc.value
@@ -485,11 +468,10 @@
       e.preventDefault();
       var salaId = form.getAttribute('data-sala-form');
       var descA = form.querySelector('[data-desc-a]').value;
-      var descB = form.querySelector('[data-desc-b]').value;
       try {
-        await global.ExpoStore.updateSala(salaId, { desc_a: descA, desc_b: descB });
+        await global.ExpoStore.updateSala(salaId, { desc_a: descA, desc_b: '' });
         await reloadData();
-        showToast('Textos de ' + salaId + '° grado actualizados.');
+        showToast('Texto de ' + salaId + '° grado actualizado.');
       } catch (err) {
         showToast('Error al guardar textos: ' + (err.message || ''), true);
       }

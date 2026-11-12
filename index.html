@@ -48,7 +48,7 @@
         <span class="qr-arrival-badge" id="qrArrivalBadge">3° grado</span>
         <div class="qr-arrival-copy">
           <strong id="qrArrivalTitle">Estás viendo la sala de 3° grado</strong>
-          <span id="qrArrivalSubtitle">Podés recorrer los turnos A y B o elegir cualquier otro grado debajo.</span>
+          <span id="qrArrivalSubtitle">Podés recorrer todas las obras o elegir cualquier otro grado debajo.</span>
         </div>
       </div>
       <div class="qr-arrival-actions">
@@ -57,22 +57,9 @@
     </div>
   </section>
 
-  <!-- ================= BARRA FIJA: BUSCADOR + TURNO + SALAS ================= -->
+  <!-- ================= BARRA FIJA: SALAS ================= -->
   <div class="barra">
     <div class="barra-inner">
-      <div class="barra-top">
-        <div class="buscador">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.8-3.8"/></svg>
-          <input type="search" id="buscar" placeholder="Buscar obra por nombre del alumno o alumna…" aria-label="Buscar obra por nombre del alumno o alumna" autocomplete="off" />
-          <button type="button" class="limpiar" id="limpiar" aria-label="Limpiar búsqueda">×</button>
-        </div>
-        <div class="turno-switch" role="group" aria-label="Filtrar por turno">
-          <button type="button" class="turno-btn" data-turno-filter="ALL" aria-pressed="true">Todos</button>
-          <button type="button" class="turno-btn" data-turno-filter="A" aria-pressed="false">Mañana (A)</button>
-          <button type="button" class="turno-btn" data-turno-filter="B" aria-pressed="false">Tarde (B)</button>
-        </div>
-      </div>
-      <p class="resultado-busqueda" id="resultadoBusqueda" role="status" aria-live="polite"></p>
       <nav class="chips" id="chipsSalas" aria-label="Ir a la sala de cada grado"></nav>
     </div>
   </div>
@@ -81,10 +68,6 @@
   <main id="salas" aria-live="polite">
     <div class="estado-vacio">Cargando las obras de la exposición…</div>
   </main>
-
-  <p class="sin-resultados" id="sinResultados">
-    No encontramos obras con ese filtro. Probá borrando la búsqueda o cambiando a «Todos» en el turno.
-  </p>
 
   <!-- ================= LIBRO DE VISITAS ================= -->
   <section class="libro-visitas" id="mensajes" aria-labelledby="tituloMensajes">
@@ -103,7 +86,7 @@
         </div>
         <div class="campo">
           <label for="msgParentesco">Vínculo o saludo corto (opcional)</label>
-          <input type="text" id="msgParentesco" maxlength="60" placeholder="Ej. Tíos de 3° A / Abuelos" />
+          <input type="text" id="msgParentesco" maxlength="60" placeholder="Ej. Tíos de 3° grado / Abuelos" />
         </div>
         <div class="campo">
           <label for="msgSala">¿Para qué grado es?</label>

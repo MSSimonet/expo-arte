@@ -94,17 +94,10 @@
         <h2>Subir trabajos desde el celular o la computadora</h2>
         <p class="panel-lead">Las imágenes se optimizan automáticamente antes de subirse para que las familias las vean rápido desde el QR.</p>
 
-        <div class="form-grid cols-2">
+        <div class="form-grid">
           <div class="campo">
             <label for="upSala">Grado / Sala</label>
             <select id="upSala"></select>
-          </div>
-          <div class="campo">
-            <label for="upTurno">Turno</label>
-            <select id="upTurno">
-              <option value="A">A · Turno mañana</option>
-              <option value="B">B · Turno tarde</option>
-            </select>
           </div>
         </div>
 
@@ -137,20 +130,14 @@
           <select id="admFilterSala" aria-label="Filtrar por grado">
             <option value="">Todos los grados</option>
           </select>
-          <select id="admFilterTurno" aria-label="Filtrar por turno">
-            <option value="">Turnos A y B</option>
-            <option value="A">Solo Mañana (A)</option>
-            <option value="B">Solo Tarde (B)</option>
-          </select>
-          <input type="search" id="admSearch" placeholder="Buscar por nombre del alumno…" aria-label="Buscar por nombre del alumno" />
         </div>
         <div class="admin-obras-grid" id="admObrasList"></div>
       </div>
 
       <!-- TAB 3: TEXTOS DE SALAS -->
       <div class="panel-card tab-panel" id="panel-salas" hidden>
-        <h2>Descripciones de cada grado y turno</h2>
-        <p class="panel-lead">Editá el texto breve que acompaña los trabajos del Turno Mañana (A) y Turno Tarde (B) en cada sala.</p>
+        <h2>Descripciones de cada grado</h2>
+        <p class="panel-lead">Editá el texto breve que acompaña los trabajos de cada sala.</p>
         <div class="sala-editor-grid" id="admSalasList"></div>
       </div>
 
@@ -169,22 +156,15 @@
       <h3 id="editModalTitle">Editar obra</h3>
       <form id="editForm" class="form-grid">
         <input type="hidden" id="edId" />
-        <div class="form-grid cols-2">
+        <div class="form-grid">
           <div class="campo">
             <label for="edSala">Grado</label>
             <select id="edSala"></select>
           </div>
-          <div class="campo">
-            <label for="edTurno">Turno</label>
-            <select id="edTurno">
-              <option value="A">A · Mañana</option>
-              <option value="B">B · Tarde</option>
-            </select>
-          </div>
         </div>
         <div class="campo">
-          <label for="edAutor">Nombre del alumno o alumna (vacío = Sin firma)</label>
-          <input type="text" id="edAutor" maxlength="80" placeholder="Ej. Valentina" />
+          <label for="edAutor">Autor/a (opcional)</label>
+          <input type="text" id="edAutor" maxlength="80" placeholder="Opcional" />
         </div>
         <div class="campo">
           <label for="edTitulo">Título o técnica (opcional)</label>

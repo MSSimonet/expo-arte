@@ -70,7 +70,7 @@
       cards.push({
         key: 'general',
         title: 'Toda la muestra',
-        subtitle: '1° a 7° grado · Turnos Mañana y Tarde',
+        subtitle: '1° a 7° grado · Muestra de arte',
         hint: 'Escaneá el código con tu celular para recorrer todas las salas de la exposición.',
         color: '#14532f',
         url: buildTargetUrl(baseUrl, null),
@@ -83,7 +83,7 @@
       cards.push({
         key: 'sala-' + s.id,
         title: s.grado + ' grado',
-        subtitle: s.nombre + ' · Turnos A y B',
+        subtitle: s.nombre,
         hint: 'Escaneá el código con tu celular para ver las obras de ' + s.grado + ' grado y recorrer el resto de la muestra.',
         color: s.color_dark,
         url: buildTargetUrl(baseUrl, s.id),

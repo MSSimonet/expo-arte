@@ -1,6 +1,6 @@
 /**
  * Lógica de la muestra pública — Pequeños grandes artistas
- * Soporta entrada directa por QR (?sala=1..7), filtros, zoom/descarga, Me gusta y libro de visitas.
+ * Soporta entrada directa por QR (?sala=1..7), navegación por salas, zoom/descarga, Me gusta y libro de visitas.
  */
 (function (global) {
   'use strict';
@@ -11,8 +11,6 @@
     mensajes: [],
     mode: 'demo',
     qrSalaId: null,
-    turnoFilter: 'ALL',
-    searchQuery: '',
     currentObraIndex: -1
   };
 
@@ -24,12 +22,8 @@
     qrArrivalTitle: document.getElementById('qrArrivalTitle'),
     qrArrivalSubtitle: document.getElementById('qrArrivalSubtitle'),
     btnVerTodas: document.getElementById('btnVerTodas'),
-    buscar: document.getElementById('buscar'),
-    limpiar: document.getElementById('limpiar'),
-    resultadoBusqueda: document.getElementById('resultadoBusqueda'),
     chipsSalas: document.getElementById('chipsSalas'),
     salasMain: document.getElementById('salas'),
-    sinResultados: document.getElementById('sinResultados'),
     msgForm: document.getElementById('msgForm'),
     msgAutor: document.getElementById('msgAutor'),
     msgParentesco: document.getElementById('msgParentesco'),
@@ -190,101 +184,45 @@
         + '<span class="pastilla">' + escapeHtml(sala.nombre) + ' · ' + obrasSala.length + (obrasSala.length === 1 ? ' obra' : ' obras') + '</span>'
         + '</div></div>';
 
-      ['A', 'B'].forEach(function (letra) {
-        var horario = letra === 'A' ? 'Turno mañana' : 'Turno tarde';
-        var desc = letra === 'A' ? sala.desc_a : sala.desc_b;
-        var obrasTurno = obrasSala.filter(function (o) { return o.turno === letra; });
+      var desc = sala.desc_a || sala.desc_b || '';
+      if (desc) {
+        html += '<p class="sala-desc">' + escapeHtml(desc) + '</p>';
+      }
 
-        html += '<div class="turno" data-turno="' + letra + '">'
-          + '<div class="turno-cab">'
-          + '<span class="letra">' + letra + '</span>'
-          + '<h3>' + escapeHtml(sala.grado) + ' ' + letra + '</h3>'
-          + '<span class="horario">' + horario + '</span>'
-          + '</div>';
-        if (desc) {
-          html += '<p class="turno-desc">' + escapeHtml(desc) + '</p>';
-        }
+      if (!obrasSala.length) {
+        html += '<div class="estado-vacio">Todavía no se cargaron obras en ' + escapeHtml(sala.grado) + ' grado.</div>';
+      } else {
+        html += '<div class="galeria">';
+        obrasSala.forEach(function (obra) {
+          var idx = state.obras.indexOf(obra);
+          var primaryLabel = obra.autor || obra.titulo || (sala.grado + ' grado');
+          var primaryClass = (obra.autor || obra.titulo) ? 'obra-autor' : 'obra-autor sin-firma';
+          var secondaryLabel = (obra.autor && obra.titulo) ? obra.titulo : '';
+          var liked = global.ExpoStore.isObraLiked(obra.id);
+          var likesCount = Number(obra.likes_count) || 0;
+          var alt = 'Obra' + (obra.autor ? ' de ' + obra.autor : (obra.titulo ? ': ' + obra.titulo : '')) + ', ' + sala.grado + ' grado';
 
-        if (!obrasTurno.length) {
-          html += '<div class="estado-vacio" data-empty-turno>Todavía no se cargaron obras en ' + escapeHtml(sala.grado) + ' ' + letra + '.</div>';
-        } else {
-          html += '<div class="galeria">';
-          obrasTurno.forEach(function (obra) {
-            var idx = state.obras.indexOf(obra);
-            var autorTexto = obra.autor ? escapeHtml(obra.autor) : 'Sin firma';
-            var autorClass = obra.autor ? 'obra-autor' : 'obra-autor sin-firma';
-            var liked = global.ExpoStore.isObraLiked(obra.id);
-            var likesCount = Number(obra.likes_count) || 0;
-            var alt = 'Obra de ' + (obra.autor || 'alumno sin firma') + ', ' + sala.grado + ' ' + letra;
-
-            html += '<article class="obra-card" data-obra-idx="' + idx + '" data-obra-id="' + escapeHtml(obra.id) + '" data-turno-card="' + letra + '" data-search="' + escapeHtml(normalizeText((obra.autor || '') + ' ' + (obra.titulo || ''))) + '">'
-              + '<button type="button" class="obra-trigger" data-open-obra="' + idx + '" aria-label="Ver en grande: ' + escapeHtml(alt) + '">'
-              + '<span class="lienzo"><img src="' + escapeHtml(obra.imagen_url) + '" alt="' + escapeHtml(alt) + '" loading="lazy" /></span>'
-              + '</button>'
-              + '<div class="obra-pie">'
-              + '<div class="obra-meta">'
-              + '<span class="' + autorClass + '">' + autorTexto + '</span>'
-              + (obra.titulo ? '<span class="obra-titulo">' + escapeHtml(obra.titulo) + '</span>' : '')
-              + '</div>'
-              + '<button type="button" class="like-btn" data-like-id="' + escapeHtml(obra.id) + '" aria-pressed="' + (liked ? 'true' : 'false') + '" aria-label="Me gusta esta obra (' + likesCount + ')">'
-              + heartSvg() + '<span>' + likesCount + '</span>'
-              + '</button>'
-              + '</div></article>';
-          });
-          html += '</div>';
-        }
+          html += '<article class="obra-card" data-obra-idx="' + idx + '" data-obra-id="' + escapeHtml(obra.id) + '">'
+            + '<button type="button" class="obra-trigger" data-open-obra="' + idx + '" aria-label="Ver en grande: ' + escapeHtml(alt) + '">'
+            + '<span class="lienzo"><img src="' + escapeHtml(obra.imagen_url) + '" alt="' + escapeHtml(alt) + '" loading="lazy" /></span>'
+            + '</button>'
+            + '<div class="obra-pie">'
+            + '<div class="obra-meta">'
+            + '<span class="' + primaryClass + '">' + escapeHtml(primaryLabel) + '</span>'
+            + (secondaryLabel ? '<span class="obra-titulo">' + escapeHtml(secondaryLabel) + '</span>' : '')
+            + '</div>'
+            + '<button type="button" class="like-btn" data-like-id="' + escapeHtml(obra.id) + '" aria-pressed="' + (liked ? 'true' : 'false') + '" aria-label="Me gusta esta obra (' + likesCount + ')">'
+            + heartSvg() + '<span>' + likesCount + '</span>'
+            + '</button>'
+            + '</div></article>';
+        });
         html += '</div>';
-      });
+      }
 
       html += '</section>';
     });
 
     els.salasMain.innerHTML = html;
-    applyFilters();
-  }
-
-  function applyFilters() {
-    var q = normalizeText(state.searchQuery.trim());
-    var turno = state.turnoFilter;
-    els.limpiar.classList.toggle('visible', q.length > 0);
-
-    var visibles = 0;
-    var cards = els.salasMain.querySelectorAll('.obra-card');
-    cards.forEach(function (card) {
-      var cardTurno = card.getAttribute('data-turno-card');
-      var cardSearch = card.getAttribute('data-search') || '';
-      var matchTurno = turno === 'ALL' || cardTurno === turno;
-      var matchQuery = !q || cardSearch.indexOf(q) !== -1;
-      var show = matchTurno && matchQuery;
-      card.classList.toggle('oculta', !show);
-      if (show) visibles++;
-    });
-
-    els.salasMain.querySelectorAll('[data-turno]').forEach(function (turnoEl) {
-      var turnoKey = turnoEl.getAttribute('data-turno');
-      var matchTurno = turno === 'ALL' || turnoKey === turno;
-      var hasCards = turnoEl.querySelectorAll('.obra-card:not(.oculta)').length > 0;
-      var isNaturallyEmpty = !!turnoEl.querySelector('[data-empty-turno]');
-      var showTurno = matchTurno && (hasCards || (!q && isNaturallyEmpty));
-      turnoEl.classList.toggle('oculto', !showTurno);
-    });
-
-    els.salasMain.querySelectorAll('.sala').forEach(function (salaEl) {
-      var anyTurno = salaEl.querySelectorAll('[data-turno]:not(.oculto)').length > 0;
-      salaEl.classList.toggle('oculta', !anyTurno);
-    });
-
-    if (q) {
-      els.resultadoBusqueda.classList.add('visible');
-      els.resultadoBusqueda.textContent = visibles === 1
-        ? 'Se encontró 1 obra con ese nombre. Tocá la imagen para verla en grande.'
-        : 'Se encontraron ' + visibles + ' obras. Tocá cualquiera para verla en grande.';
-    } else {
-      els.resultadoBusqueda.classList.remove('visible');
-    }
-
-    var emptySearch = (q.length > 0 || turno !== 'ALL') && visibles === 0;
-    els.sinResultados.classList.toggle('visible', emptySearch);
   }
 
   function renderMensajes() {
@@ -355,7 +293,7 @@
   /* ---------- Visor / Lightbox ---------- */
   function getVisibleIndices() {
     var list = [];
-    els.salasMain.querySelectorAll('.obra-card:not(.oculta)').forEach(function (card) {
+    els.salasMain.querySelectorAll('.obra-card').forEach(function (card) {
       list.push(parseInt(card.getAttribute('data-obra-idx'), 10));
     });
     return list;
@@ -366,22 +304,21 @@
     if (!obra) return;
     state.currentObraIndex = idx;
     var sala = state.salas.find(function (s) { return s.id === Number(obra.sala_id); }) || { grado: obra.sala_id + '°' };
-    var horario = obra.turno === 'A' ? 'Turno mañana' : 'Turno tarde';
 
     els.vLienzo.classList.remove('zoom');
     els.vZoomTxt.textContent = 'Acercar';
     els.vImg.src = obra.imagen_url;
-    els.vImg.alt = 'Obra de ' + (obra.autor || 'alumno sin firma') + ', ' + sala.grado + ' ' + obra.turno;
-    els.vAutor.textContent = obra.autor ? 'Obra de ' + obra.autor : 'Obra sin firma';
+    els.vImg.alt = 'Obra' + (obra.autor ? ' de ' + obra.autor : (obra.titulo ? ': ' + obra.titulo : '')) + ', ' + sala.grado + ' grado';
+    els.vAutor.textContent = obra.autor ? 'Obra de ' + obra.autor : (obra.titulo || ('Obra de ' + sala.grado + ' grado'));
 
-    if (obra.titulo) {
+    if (obra.autor && obra.titulo) {
       els.vTitulo.textContent = obra.titulo;
       els.vTitulo.hidden = false;
     } else {
       els.vTitulo.hidden = true;
     }
 
-    els.vDonde.textContent = sala.grado + ' ' + obra.turno + ' · ' + horario + ' — ' + global.EXPO_CONFIG.schoolName;
+    els.vDonde.textContent = sala.grado + ' grado — ' + global.EXPO_CONFIG.schoolName;
 
     if (obra.descripcion) {
       els.vDesc.textContent = obra.descripcion;
@@ -396,8 +333,8 @@
 
     var shareUrl = global.location.origin + global.location.pathname + '?sala=' + obra.sala_id + '&obra=' + encodeURIComponent(obra.id);
     var shareText = '¡Mirá esta obra de la muestra «' + global.EXPO_CONFIG.expoTitle + '»! '
-      + (obra.autor ? 'Es de ' + obra.autor + ', ' : 'Es una obra sin firma, ')
-      + 'de ' + sala.grado + ' ' + obra.turno + ' (' + horario.toLowerCase() + '). '
+      + (obra.autor ? 'Es de ' + obra.autor + ', ' : '')
+      + 'de ' + sala.grado + ' grado. '
       + shareUrl;
     els.vWhatsapp.href = 'https://wa.me/?text=' + encodeURIComponent(shareText);
   }
@@ -425,7 +362,8 @@
   async function downloadCurrentObra() {
     var obra = state.obras[state.currentObraIndex];
     if (!obra) return;
-    var fileBase = 'obra-' + obra.sala_id + obra.turno + (obra.autor ? '-' + normalizeText(obra.autor).replace(/[^a-z0-9]+/g, '-') : '-sin-firma');
+    var slug = obra.autor || obra.titulo;
+    var fileBase = 'obra-' + obra.sala_id + '-grado' + (slug ? '-' + normalizeText(slug).replace(/[^a-z0-9]+/g, '-') : '');
 
     try {
       if (obra.imagen_url.indexOf('data:image/svg+xml') === 0) {
@@ -469,28 +407,6 @@
 
   /* ---------- Eventos ---------- */
   function bindEvents() {
-    els.buscar.addEventListener('input', function () {
-      state.searchQuery = els.buscar.value;
-      applyFilters();
-    });
-
-    els.limpiar.addEventListener('click', function () {
-      els.buscar.value = '';
-      state.searchQuery = '';
-      applyFilters();
-      els.buscar.focus();
-    });
-
-    document.querySelectorAll('[data-turno-filter]').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        state.turnoFilter = btn.getAttribute('data-turno-filter');
-        document.querySelectorAll('[data-turno-filter]').forEach(function (b) {
-          b.setAttribute('aria-pressed', b === btn ? 'true' : 'false');
-        });
-        applyFilters();
-      });
-    });
-
     function clearQrFocus() {
       state.qrSalaId = null;
       if (global.history && global.history.replaceState) {
