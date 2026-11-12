@@ -18,8 +18,8 @@
       nombre: 'Primer grado',
       color: '#12a5b4',
       color_dark: '#076b7a',
-      desc_a: 'Primeros trazos: exploramos líneas, manchas y colores con témpera y crayones.',
-      desc_b: 'Jugamos con las formas y los colores para crear nuestros primeros paisajes.'
+      desc_a: 'Primer Grado, los Guardianes del Reino Minúsculo, forjadores de la pequeña fauna en trazo, color y volumen.',
+      desc_b: ''
     },
     {
       id: 2,
@@ -27,8 +27,8 @@
       nombre: 'Segundo grado',
       color: '#7c5cd6',
       color_dark: '#5b3ec2',
-      desc_a: 'El jardín de la escuela: observamos las plantas y las flores, y las dibujamos del natural.',
-      desc_b: 'Animales con formas geométricas: recortamos, pegamos y pintamos.'
+      desc_a: 'Segundo Grado, los Protectores del Follaje Nativo y Señores de las Bestias Aladas, nacidos de la tinta y de los cuentos antiguos.',
+      desc_b: ''
     },
     {
       id: 3,
@@ -36,8 +36,8 @@
       nombre: 'Tercer grado',
       color: '#2e7cd6',
       color_dark: '#1a5da8',
-      desc_a: 'El barrio: dibujamos las casas, la plaza y los lugares que recorremos todos los días.',
-      desc_b: 'Bajo el mar: peces, pulpos y tesoros con collage y acuarela.'
+      desc_a: 'Tercer Grado, los Custodios de los Árboles Nativos y Exploradores de la Selva Misionera, señores del relieve y de la magia desplegable.',
+      desc_b: ''
     },
     {
       id: 4,
@@ -45,8 +45,8 @@
       nombre: 'Cuarto grado',
       color: '#1e9e57',
       color_dark: '#0f6b35',
-      desc_a: 'Retratos y autorretratos: nos miramos, nos dibujamos y nos reímos de nosotros mismos.',
-      desc_b: 'El cielo y el espacio: cohetes, planetas y estrellas sobre papel oscuro.'
+      desc_a: 'Cuarto Grado, los Cartógrafos del Barrio y de las Calles, guardianes de las estatuas de piedra transformadas en relieve.',
+      desc_b: ''
     },
     {
       id: 5,
@@ -54,8 +54,8 @@
       nombre: 'Quinto grado',
       color: '#ef8a17',
       color_dark: '#9a5500',
-      desc_a: 'Naturaleza argentina: paisajes de la montaña, el río y la llanura.',
-      desc_b: 'Estampas y sellos: repetimos motivos y creamos patrones llenos de color.'
+      desc_a: 'Quinto Grado, los Titanes del Movimiento y de la Materia, señores que otorgan danza y vida a los huesos en mundos imaginarios.',
+      desc_b: ''
     },
     {
       id: 6,
@@ -63,8 +63,8 @@
       nombre: 'Sexto grado',
       color: '#df3e7c',
       color_dark: '#b81e5a',
-      desc_a: 'La ciudad en perspectiva: edificios, puentes y calles con profundidad.',
-      desc_b: 'Arte y reciclado: obras hechas con materiales reutilizados del aula.'
+      desc_a: 'Sexto Grado, los Sabios del Delta y Defensores de la Tierra, forjadores de relieves en cartón y guardianes del grabado ecológico.',
+      desc_b: ''
     },
     {
       id: 7,
@@ -72,8 +72,8 @@
       nombre: 'Séptimo grado',
       color: '#2b3a9e',
       color_dark: '#232f7d',
-      desc_a: 'Homenaje a grandes artistas: reinterpretamos obras famosas a nuestro modo.',
-      desc_b: 'Proyecto final: una obra libre para cerrar el paso por la escuela primaria.'
+      desc_a: 'Séptimo Grado, los Maestros de la Perspectiva y Herederos del Muro, caballeros del esténcil y discípulos de la rebelión urbana.',
+      desc_b: ''
     }
   ];
 
