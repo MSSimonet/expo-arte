@@ -453,23 +453,23 @@ main {
 
 /* Frase épica de cada sala */
 .sala-desc {
-  --fuente-epica: "Fraunces", Georgia, "Times New Roman", serif;
+  --fuente-epica: "trajan-pro-3", "Trajan Pro 3", "Trajan Pro", "Cinzel", Georgia, serif;
   position: relative;
-  margin: var(--sp-6) auto 0;
+  margin: calc(var(--sp-6) + 4px) auto 0;
   padding-top: var(--sp-5);
   max-width: 36ch;
   text-align: center;
   text-wrap: balance;
   font-family: var(--fuente-epica);
-  font-optical-sizing: auto;
-  font-size: 1.125rem;      /* 18px */
-  font-weight: 500;
-  line-height: 1.5;
+  font-size: 1.0625rem;     /* 17px */
+  font-weight: 600;
+  line-height: 1.6;
+  letter-spacing: 0.04em;
   color: var(--sala-ink);
   overflow-wrap: break-word;
 }
 @media (min-width: 760px) {
-  .sala-desc { font-size: 1.25rem; max-width: 40ch; }
+  .sala-desc { font-size: 1.125rem; max-width: 40ch; }  /* 18px */
 }
 /* Filete fino con rombo, del color del grado */
 .sala-desc::before {
