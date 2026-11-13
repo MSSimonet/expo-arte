@@ -397,7 +397,8 @@ main {
   position: relative;
   overflow: hidden;
   border-radius: var(--radius-lg);
-  padding: var(--sp-6) var(--sp-4);
+  --cab-px: var(--sp-4);
+  padding: var(--sp-6) var(--cab-px);
   color: #ffffff;
   text-align: center;
   background-color: var(--sala-vivid);
@@ -409,7 +410,8 @@ main {
 }
 @media (min-width: 760px) {
   .sala-cabecera {
-    padding: var(--sp-8) var(--sp-6);
+    --cab-px: var(--sp-6);
+    padding: var(--sp-8) var(--cab-px);
   }
 }
 .sala.destacada .sala-cabecera {
@@ -451,49 +453,57 @@ main {
   border: 0;
 }
 
-/* Frase épica de cada sala */
+/* Frase épica de cada sala: franja inferior del cuadro, en el tono oscuro del grado */
+.sala-cabecera:has(.sala-desc) {
+  padding-bottom: 0;   /* la franja de la frase cierra el cuadro; sin frase, queda el relleno de siempre */
+}
 .sala-desc {
   --fuente-epica: "trajan-pro-3", "Trajan Pro 3", "Trajan Pro", "Cinzel", Georgia, serif;
   position: relative;
-  margin: calc(var(--sp-6) + 4px) auto 0;
-  padding-top: var(--sp-5);
-  max-width: 36ch;
+  /* sangra hasta los bordes del cuadro (el cuadro recorta con overflow: hidden) */
+  margin: var(--sp-5) calc(-1 * var(--cab-px)) 0;
+  /* 1rem a los costados; en pantallas grandes el texto se limita a 52rem, centrado */
+  padding:
+    calc(var(--sp-5) + 12px)
+    max(1rem, calc((100% + 2 * var(--cab-px) - 52rem) / 2))
+    var(--sp-6);
+  background: var(--sala);
+  color: #ffffff;
   text-align: center;
   text-wrap: balance;
   font-family: var(--fuente-epica);
   font-size: 1.0625rem;     /* 17px */
   font-weight: 600;
   line-height: 1.6;
-  letter-spacing: 0.04em;
-  color: var(--sala-ink);
+  letter-spacing: 0.02em;
   overflow-wrap: break-word;
 }
 @media (min-width: 760px) {
-  .sala-desc { font-size: 1.125rem; max-width: 40ch; }  /* 18px */
+  .sala-desc { font-size: 1.125rem; }  /* 18px */
 }
-/* Filete fino con rombo, del color del grado */
+/* Filete fino con rombo, blanco translúcido */
 .sala-desc::before {
   content: "";
   position: absolute;
-  top: 0;
+  top: var(--sp-4);
   left: 50%;
   width: 96px;
   height: 9px;
   translate: -50% 0;
   background:
-    linear-gradient(var(--sala-vivid), var(--sala-vivid)) left center / 38px 1.5px no-repeat,
-    linear-gradient(var(--sala-vivid), var(--sala-vivid)) right center / 38px 1.5px no-repeat;
+    linear-gradient(rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.55)) left center / 38px 1.5px no-repeat,
+    linear-gradient(rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.55)) right center / 38px 1.5px no-repeat;
 }
 .sala-desc::after {
   content: "";
   position: absolute;
-  top: 0;
+  top: var(--sp-4);
   left: 50%;
   width: 9px;
   height: 9px;
   translate: -50% 0;
   rotate: 45deg;
-  background: var(--sala-vivid);
+  background: rgba(255, 255, 255, 0.55);
 }
 
 /* ---------- Galería de obras ---------- */
@@ -611,12 +621,9 @@ main {
   color: #17232d;
   overflow-wrap: break-word;
 }
+/* Obra sin autor ni título: no se muestra relleno; el corazón queda a la derecha (.obra-meta ocupa el resto) */
 .obra-autor.sin-firma {
-  color: #516575;
-  font-style: italic;
-  font-family: var(--font-body);
-  font-weight: 700;
-  font-size: 0.92rem;
+  display: none;
 }
 .obra-titulo {
   display: block;

@@ -183,12 +183,13 @@
         + '<h2>' + escapeHtml(sala.grado) + ' <em>grado</em></h2>'
         + '<div class="sala-subbar">'
         + '<span class="pastilla">' + escapeHtml(sala.nombre) + ' · ' + obrasSala.length + (obrasSala.length === 1 ? ' obra' : ' obras') + '</span>'
-        + '</div></div>';
+        + '</div>';
 
       var desc = sala.desc_a || sala.desc_b || '';
       if (desc) {
         html += '<p class="sala-desc">' + escapeHtml(desc) + '</p>';
       }
+      html += '</div>';
 
       if (!obrasSala.length) {
         html += '<div class="estado-vacio">Todavía no se cargaron obras en ' + escapeHtml(sala.grado) + ' grado.</div>';
@@ -311,6 +312,7 @@
     els.vImg.src = obra.imagen_url;
     els.vImg.alt = 'Obra' + (obra.autor ? ' de ' + obra.autor : (obra.titulo ? ': ' + obra.titulo : '')) + ', ' + sala.grado + ' grado';
     els.vAutor.textContent = obra.autor ? 'Obra de ' + obra.autor : (obra.titulo || ('Obra de ' + sala.grado + ' grado'));
+    els.vAutor.hidden = !(obra.autor || obra.titulo);
 
     if (obra.autor && obra.titulo) {
       els.vTitulo.textContent = obra.titulo;
