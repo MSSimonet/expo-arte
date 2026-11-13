@@ -1,5 +1,11 @@
 /* Pequeños grandes artistas — Habilitar ingreso docente con número de acceso (PIN) */
 
+-- IMPORTANTE: el número de acceso docente real NO se guarda en este repositorio.
+-- Antes de ejecutar este archivo, reemplazá CAMBIAR_ANTES_DE_EJECUTAR (aparece 2 veces, en las dos funciones de abajo)
+-- por el número elegido, escrito entre comillas simples. Si lo ejecutás sin reemplazarlo, el acceso docente por
+-- número queda cerrado (nadie puede ingresar) hasta que lo cambies.
+-- Para cambiar el número en una base ya creada, usá un archivo SQL local que no se versione (ver .gitignore).
+
 create or replace function public.es_docente_pin()
 returns boolean
 language sql
@@ -8,7 +14,7 @@ as $$
   select coalesce(
     nullif(current_setting('request.headers', true), '')::jsonb ->> 'x-docente-pin',
     ''
-  ) = '46411564';
+  ) = nullif('CAMBIAR_ANTES_DE_EJECUTAR', 'CAMBIAR_' || 'ANTES_DE_EJECUTAR');
 $$;
 
 create or replace function public.verificar_pin_docente(p_pin text)
@@ -18,7 +24,7 @@ stable
 security definer
 set search_path = public
 as $$
-  select btrim(coalesce(p_pin, '')) = '46411564';
+  select btrim(coalesce(p_pin, '')) = nullif('CAMBIAR_ANTES_DE_EJECUTAR', 'CAMBIAR_' || 'ANTES_DE_EJECUTAR');
 $$;
 
 revoke all on function public.verificar_pin_docente(text) from public;

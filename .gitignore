@@ -7,3 +7,5 @@ playwright-report/
 
 # Originales de las fotos (solo en la raíz; no confundir con assets/obras/, que SÍ se sube)
 /Obras/
+# SQL local para cambiar el número de acceso docente (contiene el número real: NUNCA se sube)
+supabase-rotar-pin.sql
