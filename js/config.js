@@ -18,7 +18,7 @@
       nombre: 'Primer grado',
       color: '#12a5b4',
       color_dark: '#076b7a',
-      desc_a: 'Primer Grado, los Guardianes del Reino Minúsculo, forjadores de la pequeña fauna en trazo, color y volumen.',
+      desc_a: 'Guardianes del Reino Minúsculo, forjadores de la pequeña fauna en trazo, color y volumen.',
       desc_b: ''
     },
     {
@@ -27,7 +27,7 @@
       nombre: 'Segundo grado',
       color: '#7c5cd6',
       color_dark: '#5b3ec2',
-      desc_a: 'Segundo Grado, los Protectores del Follaje Nativo y Señores de las Bestias Aladas, nacidos de la tinta y de los cuentos antiguos.',
+      desc_a: 'Protectores del Follaje Nativo y Señores de las Bestias Aladas, nacidos de la tinta y de los cuentos antiguos.',
       desc_b: ''
     },
     {
@@ -36,7 +36,7 @@
       nombre: 'Tercer grado',
       color: '#2e7cd6',
       color_dark: '#1a5da8',
-      desc_a: 'Tercer Grado, los Custodios de los Árboles Nativos y Exploradores de la Selva Misionera, señores del relieve y de la magia desplegable.',
+      desc_a: 'Custodios de los Árboles Nativos y Exploradores de la Selva Misionera, señores del relieve y de la magia desplegable.',
       desc_b: ''
     },
     {
@@ -45,7 +45,7 @@
       nombre: 'Cuarto grado',
       color: '#1e9e57',
       color_dark: '#0f6b35',
-      desc_a: 'Cuarto Grado, los Cartógrafos del Barrio y de las Calles, guardianes de las estatuas de piedra transformadas en relieve.',
+      desc_a: 'Cartógrafos del Barrio y de las Calles, guardianes de las estatuas de piedra transformadas en relieve.',
       desc_b: ''
     },
     {
@@ -54,7 +54,7 @@
       nombre: 'Quinto grado',
       color: '#ef8a17',
       color_dark: '#9a5500',
-      desc_a: 'Quinto Grado, los Titanes del Movimiento y de la Materia, señores que otorgan danza y vida a los huesos en mundos imaginarios.',
+      desc_a: 'Titanes del Movimiento y de la Materia, señores que otorgan danza y vida a los huesos en mundos imaginarios.',
       desc_b: ''
     },
     {
@@ -63,7 +63,7 @@
       nombre: 'Sexto grado',
       color: '#df3e7c',
       color_dark: '#b81e5a',
-      desc_a: 'Sexto Grado, los Sabios del Delta y Defensores de la Tierra, forjadores de relieves en cartón y guardianes del grabado ecológico.',
+      desc_a: 'Sabios del Delta y Defensores de la Tierra, forjadores de relieves en cartón y guardianes del grabado ecológico.',
       desc_b: ''
     },
     {
@@ -72,7 +72,7 @@
       nombre: 'Séptimo grado',
       color: '#2b3a9e',
       color_dark: '#232f7d',
-      desc_a: 'Séptimo Grado, los Maestros de la Perspectiva y Herederos del Muro, caballeros del esténcil y discípulos de la rebelión urbana.',
+      desc_a: 'Maestros de la Perspectiva y Herederos del Muro, caballeros del esténcil y discípulos de la rebelión urbana.',
       desc_b: ''
     }
   ];

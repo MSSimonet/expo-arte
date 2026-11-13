@@ -10,8 +10,12 @@
     DOCENTE_PIN: 'expo_docente_pin_v1',
     DEMO_OBRAS: 'expo_demo_obras_v1',
     DEMO_MENSAJES: 'expo_demo_mensajes_v1',
-    DEMO_SALAS: 'expo_demo_salas_v1'
+    DEMO_SALAS: 'expo_demo_salas_v1',
+    DEMO_LIKES: 'expo_demo_likes_v1'
   };
+
+  var OBRAS_JSON = 'obras.json';
+  var ID_FOTO = /^[0-9a-f]{16}$/;
 
   var _client = null;
   var _clientSignature = '';
@@ -63,8 +67,42 @@
     return _client;
   }
 
+  /** ¿Hay credenciales válidas de Supabase? (no exige que el SDK ya esté cargado) */
+  function hasCredentials() {
+    try {
+      return !!global.getSupabaseCredentials().valid;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  var _sdkPromise = null;
+
+  /**
+   * Carga el SDK de Supabase recién cuando hace falta (la muestra pública no lo necesita para mostrar las fotos).
+   * Si ya está cargado (admin.html lo incluye directo) o no hay credenciales, resuelve enseguida.
+   */
+  function ensureSdk() {
+    if (global.supabase && global.supabase.createClient) return Promise.resolve(true);
+    if (!hasCredentials()) return Promise.resolve(false);
+    if (_sdkPromise) return _sdkPromise;
+    _sdkPromise = new Promise(function (resolve) {
+      var tag = document.createElement('script');
+      tag.src = 'js/vendor/supabase.js';
+      tag.async = true;
+      tag.onload = function () { resolve(!!(global.supabase && global.supabase.createClient)); };
+      tag.onerror = function () { _sdkPromise = null; resolve(false); };
+      document.head.appendChild(tag);
+    });
+    return _sdkPromise;
+  }
+
+  function errorSinConexion() {
+    return new Error('No se pudo conectar con el servidor. Revisá tu conexión e intentá de nuevo.');
+  }
+
   function isLive() {
-    return !!getClient();
+    return hasCredentials();
   }
 
   function readJson(key, fallback) {
@@ -108,8 +146,16 @@
     return fresh;
   }
 
+  /** Salas para dibujar al instante, sin esperar a Supabase (los textos se completan después). */
+  function getSalasIniciales() {
+    if (!hasCredentials()) return ensureDemoSalas();
+    return global.SALAS_DEFAULT.map(function (sala) { return Object.assign({}, sala); });
+  }
+
   async function fetchSalas() {
+    await ensureSdk();
     var sb = getClient();
+    if (!sb && hasCredentials()) throw errorSinConexion();
     if (!sb) return { data: ensureDemoSalas(), mode: 'demo' };
 
     var res = await sb.from('salas').select('*').order('id', { ascending: true });
@@ -148,28 +194,105 @@
     return seed;
   }
 
+  /**
+   * Las fotos salen de obras.json (generado con `npm run obras` a partir de la carpeta Obras/).
+   * Si falta el archivo o está vacío, no se rompe: cada sala muestra su estado vacío
+   * (y en modo vista previa sin credenciales se usan las obras de ejemplo).
+   */
+  async function leerObrasJson() {
+    try {
+      var resp = await fetch(OBRAS_JSON);
+      if (!resp.ok) return [];
+      var json = await resp.json();
+      return Array.isArray(json && json.obras) ? json.obras : [];
+    } catch (_) {
+      return [];
+    }
+  }
+
+  function readDemoLikes() {
+    var m = readJson(KEYS.DEMO_LIKES, {});
+    return m && typeof m === 'object' && !Array.isArray(m) ? m : {};
+  }
+
+  function obraDesdeJson(item, indice, likes) {
+    var v = item.v ? '?v=' + encodeURIComponent(item.v) : '';
+    return {
+      id: String(item.id),
+      sala_id: Number(item.grado),
+      turno: 'A',
+      autor: item.autor || null,
+      titulo: item.titulo || null,
+      descripcion: null,
+      imagen_url: String(item.imagen) + v,
+      thumb_url: String(item.miniatura || item.imagen) + v,
+      ancho: item.ancho || null,
+      alto: item.alto || null,
+      orden: indice,
+      likes_count: Number(likes[item.id]) || 0
+    };
+  }
+
   async function fetchObras() {
-    var sb = getClient();
-    if (!sb) {
+    var live = hasCredentials();
+    var lista = (await leerObrasJson()).filter(function (o) {
+      return o && ID_FOTO.test(String(o.id)) && Number(o.grado) >= 1 && Number(o.grado) <= 7 && o.imagen;
+    });
+
+    if (!lista.length && !live) {
       return { data: ensureDemoObras(), mode: 'demo' };
     }
 
-    var res = await sb
-      .from('obras')
-      .select('*')
-      .order('sala_id', { ascending: true })
-      .order('turno', { ascending: true })
-      .order('orden', { ascending: true })
-      .order('created_at', { ascending: false });
+    var likes = live ? {} : readDemoLikes();
+    return {
+      data: lista.map(function (item, i) { return obraDesdeJson(item, i, likes); }),
+      mode: live ? 'live' : 'demo'
+    };
+  }
 
+  /** Contadores de Me gusta de las fotos: { idFoto: cantidad } */
+  async function fetchLikes() {
+    if (!hasCredentials()) return { data: readDemoLikes(), mode: 'demo' };
+    await ensureSdk();
+    var sb = getClient();
+    if (!sb) throw errorSinConexion();
+    var res = await sb.from('obra_likes').select('foto_id, likes_count');
     if (res.error) throw res.error;
-    return { data: res.data || [], mode: 'live' };
+    var mapa = {};
+    (res.data || []).forEach(function (r) { mapa[r.foto_id] = Number(r.likes_count) || 0; });
+    return { data: mapa, mode: 'live' };
   }
 
   async function reactToObra(obraId, shouldLike) {
     var delta = shouldLike ? 1 : -1;
-    var sb = getClient();
     setObraLikedLocal(obraId, shouldLike);
+
+    // Fotos de la carpeta Obras/: el contador vive en la tabla obra_likes (función reaccionar_foto).
+    var demoObras = hasCredentials() ? [] : ensureDemoObras();
+    var esFotoDeCarpeta = ID_FOTO.test(String(obraId)) && !demoObras.some(function (o) { return String(o.id) === String(obraId); });
+    if (esFotoDeCarpeta) {
+      if (!hasCredentials()) {
+        var mapa = readDemoLikes();
+        mapa[obraId] = Math.max(0, (Number(mapa[obraId]) || 0) + delta);
+        writeJson(KEYS.DEMO_LIKES, mapa);
+        return mapa[obraId];
+      }
+      await ensureSdk();
+      var sbFoto = getClient();
+      if (!sbFoto) {
+        setObraLikedLocal(obraId, !shouldLike);
+        throw errorSinConexion();
+      }
+      var resFoto = await sbFoto.rpc('reaccionar_foto', { p_foto_id: String(obraId), p_delta: delta });
+      if (resFoto.error) {
+        setObraLikedLocal(obraId, !shouldLike);
+        throw resFoto.error;
+      }
+      return Number(resFoto.data) || 0;
+    }
+
+    await ensureSdk();
+    var sb = getClient();
 
     if (!sb) {
       var obras = ensureDemoObras();
@@ -408,7 +531,9 @@
   }
 
   async function fetchMensajes() {
+    await ensureSdk();
     var sb = getClient();
+    if (!sb && hasCredentials()) throw errorSinConexion();
     if (!sb) return { data: ensureDemoMensajes(), mode: 'demo' };
 
     var res = await sb
@@ -435,7 +560,9 @@
       throw new Error('Completá tu nombre y el mensaje.');
     }
 
+    await ensureSdk();
     var sb = getClient();
+    if (!sb && hasCredentials()) throw errorSinConexion();
     if (!sb) {
       var created = Object.assign({}, row, {
         id: 'demo-msg-' + randomId(),
@@ -453,6 +580,7 @@
   }
 
   async function deleteMensaje(id) {
+    await ensureSdk();
     var sb = getClient();
     if (!sb) {
       var list = ensureDemoMensajes().filter(function (m) {
@@ -537,12 +665,17 @@
       global.localStorage.removeItem(KEYS.DEMO_OBRAS);
       global.localStorage.removeItem(KEYS.DEMO_MENSAJES);
       global.localStorage.removeItem(KEYS.DEMO_SALAS);
+      global.localStorage.removeItem(KEYS.DEMO_LIKES);
       global.localStorage.removeItem(KEYS.LIKED);
     } catch (_) {}
   }
 
   global.ExpoStore = {
     isLive: isLive,
+    hasCredentials: hasCredentials,
+    ready: ensureSdk,
+    getSalasIniciales: getSalasIniciales,
+    fetchLikes: fetchLikes,
     isObraLiked: isObraLiked,
     fetchSalas: fetchSalas,
     updateSala: updateSala,

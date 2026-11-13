@@ -78,15 +78,27 @@
 
     <!-- ================= ESPACIO DE TRABAJO ================= -->
     <section id="workspace" hidden>
+      <!-- Las fotos ya no se suben desde el panel: salen de la carpeta Obras/ (ver el aviso de abajo). -->
+      <div class="panel-card" id="avisoFotos" style="margin-bottom: 1.2rem;">
+        <h2>Las fotos ahora se cargan desde la carpeta Obras/</h2>
+        <p class="panel-lead">Ya no se suben fotos desde este panel. Las obras salen de las carpetas <strong>Obras/1</strong> a <strong>Obras/7</strong> (una por grado) del proyecto, y se publican así:</p>
+        <ol class="setup-steps">
+          <li>Copiá las fotos a la carpeta del grado (por ejemplo <code>Obras/3</code> para 3° grado). Si querés mostrar autor y título, nombrá el archivo <code>Autor - Título.jpg</code>.</li>
+          <li>En la terminal, dentro del proyecto, corré <code>npm run obras</code>.</li>
+          <li>Subí los cambios a GitHub (<code>assets/obras</code> y <code>obras.json</code>). En un par de minutos las fotos están en la muestra.</li>
+        </ol>
+        <p class="panel-lead" style="margin-bottom: 0;">Desde acá seguís pudiendo editar los textos de cada sala y moderar los mensajes de las familias.</p>
+      </div>
+
       <nav class="tabs" role="tablist" aria-label="Secciones del panel docente">
-        <button type="button" class="tab-btn" role="tab" aria-selected="true" data-tab="subir">Subir fotos</button>
-        <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="obras" id="tabObrasBtn">Obras cargadas (0)</button>
-        <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="salas">Textos de salas</button>
+        <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="subir" hidden>Subir fotos</button>
+        <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="obras" id="tabObrasBtn" hidden>Obras cargadas (0)</button>
+        <button type="button" class="tab-btn" role="tab" aria-selected="true" data-tab="salas">Textos de salas</button>
         <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="mensajes" id="tabMensajesBtn">Mensajes (0)</button>
       </nav>
 
       <!-- TAB 1: SUBIR FOTOS -->
-      <div class="panel-card tab-panel" id="panel-subir">
+      <div class="panel-card tab-panel" id="panel-subir" hidden>
         <h2>Subir trabajos desde el celular o la computadora</h2>
         <p class="panel-lead">Las imágenes se optimizan automáticamente antes de subirse para que las familias las vean rápido desde el QR.</p>
 
@@ -131,7 +143,7 @@
       </div>
 
       <!-- TAB 3: TEXTOS DE SALAS -->
-      <div class="panel-card tab-panel" id="panel-salas" hidden>
+      <div class="panel-card tab-panel" id="panel-salas">
         <h2>Descripciones de cada grado</h2>
         <p class="panel-lead">Editá el texto breve que acompaña los trabajos de cada sala.</p>
         <div class="sala-editor-grid" id="admSalasList"></div>

@@ -8,6 +8,11 @@
   <meta name="description" content="Muestra de arte Pequeños grandes artistas — Escuela N° 5 D.E. 13 Roberto Billinghurst." />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2314532f'/%3E%3Ccircle cx='24' cy='26' r='10' fill='%23ffc21f'/%3E%3Ccircle cx='42' cy='38' r='11' fill='%23d92e25'/%3E%3C/svg%3E" />
   <title>Pequeños grandes artistas — Escuela N° 5 D.E. 13 “Roberto Billinghurst”</title>
+  <!-- Las fotos salen de obras.json (mismo sitio): se pide apenas se lee el HTML -->
+  <link rel="preload" href="obras.json" as="fetch" crossorigin="anonymous" />
+  <!-- Supabase solo se usa para Me gusta, mensajes y textos de las salas -->
+  <link rel="preconnect" href="https://ffwnfluyutkfdtjfrypv.supabase.co" crossorigin />
+  <link rel="dns-prefetch" href="https://ffwnfluyutkfdtjfrypv.supabase.co" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Cinzel:wght@600&display=swap" rel="stylesheet" />
@@ -138,7 +143,7 @@
   <!-- ================= PIE / CRÉDITO ================= -->
   <footer>
     <div class="credito">
-      <video class="retrato" autoplay muted loop playsinline poster="assets/alicia-poster.png" aria-label="Retrato animado de la Prof. Alicia Correa">
+      <video class="retrato" muted loop playsinline preload="none" poster="assets/alicia-poster.webp" aria-label="Retrato animado de la Prof. Alicia Correa">
         <source src="assets/alicia-retrato.mp4" type="video/mp4" />
       </video>
       <p>
@@ -195,11 +200,12 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="js/vendor/supabase.js"></script>
-  <script src="js/config.js"></script>
-  <script src="js/datos-demo.js"></script>
-  <script src="js/supabase-service.js"></script>
-  <script src="js/expo-app.js"></script>
+  <!-- js/vendor/supabase.js ya no se carga acá: supabase-service.js lo pide recién cuando hace falta -->
+  <script src="js/config.js" defer></script>
+  <script src="js/datos-demo.js" defer></script>
+  <script src="js/supabase-service.js" defer></script>
+  <script src="js/expo-app.js" defer></script>
   <script src="js/animaciones.js" defer></script>
+  <script src="js/carga.js" defer></script>
 </body>
 </html>

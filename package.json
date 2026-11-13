@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "obras": "node scripts/generar-obras.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -16,6 +17,7 @@
   },
   "devDependencies": {
     "esbuild": "^0.28.2",
-    "playwright": "^1.65.0"
+    "playwright": "^1.65.0",
+    "sharp": "^0.35.5"
   }
 }

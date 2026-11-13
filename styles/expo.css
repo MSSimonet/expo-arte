@@ -277,6 +277,25 @@
   .qr-arrival-actions .btn { flex: 0 0 auto; }
 }
 
+/* ---------- Llegada por QR en celulares: portada y cartel más bajos ----------
+   Así la cabecera de la sala (y, en pantallas más altas, las primeras fotos) entran en la primera pantalla.
+   La portada completa sigue igual cuando no se llega por QR. */
+@media (max-width: 480px) {
+  .hero.compacto {
+    padding-top: var(--sp-3);
+    padding-bottom: var(--sp-3);
+  }
+  .hero.compacto .hero-meta { margin-top: var(--sp-2); }
+  .hero.compacto .hero-school { font-size: 0.98rem; }
+  .hero.compacto .hero-badges { margin-top: var(--sp-2); }
+  .hero.compacto .hero-cta-msg { display: none; }   /* el chip "Mensajes" de la barra lleva al mismo lugar */
+  .qr-arrival { margin-top: var(--sp-3); }
+  .qr-arrival-card { padding: var(--sp-3); gap: var(--sp-2) var(--sp-3); }
+  .qr-arrival-copy span { display: none; }
+  .qr-arrival-badge { padding: 0.35rem 0.7rem; }
+  .qr-arrival .btn { min-height: var(--tap); }
+}
+
 /* ---------- Barra fija: navegación rápida de salas ---------- */
 .barra {
   position: sticky;

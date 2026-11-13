@@ -5,4 +5,5 @@ test-results/
 playwright-report/
 .impeccable/
 
-Obras/
+# Originales de las fotos (solo en la raíz; no confundir con assets/obras/, que SÍ se sube)
+/Obras/

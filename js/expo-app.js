@@ -11,8 +11,13 @@
     mensajes: [],
     mode: 'demo',
     qrSalaId: null,
-    currentObraIndex: -1
+    currentObraIndex: -1,
+    mensajesCargados: false,
+    tocadas: {}
   };
+
+  // Las primeras fotos de la página se piden con prioridad alta y sin carga diferida; el resto, diferida y con prioridad baja.
+  var PRIORIDAD_FOTOS = 6;
 
   var els = {
     demoStrip: document.getElementById('demoStrip'),
@@ -144,7 +149,7 @@
       var isActive = state.qrSalaId === sala.id;
       chipsHtml += '<a class="chip c' + sala.id + (isActive ? ' activa' : '') + '" href="#sala-' + sala.id + '">Sala ' + escapeHtml(sala.grado) + '</a>';
     });
-    chipsHtml += '<a class="chip c-msg" href="#mensajes">Mensajes (' + state.mensajes.length + ')</a>';
+    chipsHtml += '<a class="chip c-msg" href="#mensajes">Mensajes' + (state.mensajesCargados ? ' (' + state.mensajes.length + ')' : '') + '</a>';
     els.chipsSalas.innerHTML = chipsHtml;
 
     var activeChip = els.chipsSalas.querySelector('.chip.activa');
@@ -173,6 +178,7 @@
   function renderSalas() {
     var orderedSalas = getOrderedSalas();
     var html = '';
+    var fotosDibujadas = 0;
 
     orderedSalas.forEach(function (sala) {
       var obrasSala = state.obras.filter(function (o) { return Number(o.sala_id) === Number(sala.id); });
@@ -203,10 +209,13 @@
           var liked = global.ExpoStore.isObraLiked(obra.id);
           var likesCount = Number(obra.likes_count) || 0;
           var alt = 'Obra' + (obra.autor ? ' de ' + obra.autor : (obra.titulo ? ': ' + obra.titulo : '')) + ', ' + sala.grado + ' grado';
+          var esPrioritaria = fotosDibujadas < PRIORIDAD_FOTOS;
+          fotosDibujadas++;
+          var atributosCarga = esPrioritaria ? ' fetchpriority="high" decoding="async"' : ' loading="lazy" fetchpriority="low" decoding="async"';
 
           html += '<article class="obra-card" data-obra-idx="' + idx + '" data-obra-id="' + escapeHtml(obra.id) + '">'
             + '<button type="button" class="obra-trigger" data-open-obra="' + idx + '" aria-label="Ver en grande: ' + escapeHtml(alt) + '">'
-            + '<span class="lienzo"><img src="' + escapeHtml(obra.imagen_url) + '" alt="' + escapeHtml(alt) + '" loading="lazy" /></span>'
+            + '<span class="lienzo"><img src="' + escapeHtml(obra.thumb_url || obra.imagen_url) + '" alt="' + escapeHtml(alt) + '"' + atributosCarga + ' /></span>'
             + '</button>'
             + '<div class="obra-pie">'
             + '<div class="obra-meta">'
@@ -278,6 +287,7 @@
   async function toggleLike(obraId) {
     var obra = state.obras.find(function (o) { return String(o.id) === String(obraId); });
     if (!obra) return;
+    state.tocadas[String(obraId)] = true;
     var nextLiked = !global.ExpoStore.isObraLiked(obraId);
     var optimistic = Math.max(0, (Number(obra.likes_count) || 0) + (nextLiked ? 1 : -1));
     syncLikeUI(obraId, optimistic, nextLiked);
@@ -309,7 +319,19 @@
 
     els.vLienzo.classList.remove('zoom');
     els.vZoomTxt.textContent = 'Acercar';
-    els.vImg.src = obra.imagen_url;
+    els.vImg.removeAttribute('data-hd');
+    els.vImg.setAttribute('data-obra-id', String(obra.id));
+    els.vImg.src = obra.thumb_url || obra.imagen_url;
+    if (obra.thumb_url && obra.thumb_url !== obra.imagen_url) {
+      var grande = new Image();
+      grande.onload = function () {
+        if (state.currentObraIndex === idx) {
+          els.vImg.setAttribute('data-hd', '1'); // marca para que animaciones.js no lo trate como cambio de obra
+          els.vImg.src = obra.imagen_url;
+        }
+      };
+      grande.src = obra.imagen_url;
+    }
     els.vImg.alt = 'Obra' + (obra.autor ? ' de ' + obra.autor : (obra.titulo ? ': ' + obra.titulo : '')) + ', ' + sala.grado + ' grado';
     els.vAutor.textContent = obra.autor ? 'Obra de ' + obra.autor : (obra.titulo || ('Obra de ' + sala.grado + ' grado'));
     els.vAutor.hidden = !(obra.autor || obra.titulo);
@@ -511,27 +533,101 @@
     });
   }
 
+  /* ---------- Datos que llegan después (Supabase) ---------- */
+  function aplicarSalas(rows) {
+    if (!Array.isArray(rows) || !rows.length) return;
+    state.salas = rows;
+    rows.forEach(function (sala) {
+      var seccion = document.getElementById('sala-' + sala.id);
+      var cabecera = seccion && seccion.querySelector('.sala-cabecera');
+      if (!cabecera) return;
+      var texto = sala.desc_a || sala.desc_b || '';
+      var p = cabecera.querySelector('.sala-desc');
+      if (!texto) {
+        if (p) p.remove();
+        return;
+      }
+      if (p) {
+        if (p.textContent !== texto) p.textContent = texto;
+      } else {
+        p = document.createElement('p');
+        p.className = 'sala-desc';
+        p.textContent = texto;
+        cabecera.appendChild(p);
+      }
+    });
+  }
+
+  function aplicarLikes(mapa) {
+    state.obras.forEach(function (obra) {
+      var id = String(obra.id);
+      if (state.tocadas[id] || mapa[id] === undefined) return;
+      var cantidad = Number(mapa[id]) || 0;
+      if (cantidad !== (Number(obra.likes_count) || 0)) {
+        syncLikeUI(id, cantidad, global.ExpoStore.isObraLiked(id));
+      }
+    });
+  }
+
+  function esperarPrimerasFotos(maxMs) {
+    return new Promise(function (resolve) {
+      var pendientes = Array.prototype.slice
+        .call(els.salasMain.querySelectorAll('.obra-card img'), 0, PRIORIDAD_FOTOS)
+        .filter(function (img) { return !img.complete; });
+      if (!pendientes.length) { resolve(); return; }
+      var falta = pendientes.length;
+      var listo = false;
+      function fin() { if (!listo) { listo = true; resolve(); } }
+      pendientes.forEach(function (img) {
+        function uno() { falta--; if (falta <= 0) fin(); }
+        img.addEventListener('load', uno, { once: true });
+        img.addEventListener('error', uno, { once: true });
+      });
+      global.setTimeout(fin, maxMs);
+    });
+  }
+
+  async function cargarDatosRemotos() {
+    var store = global.ExpoStore;
+    // Con conexión real: primero las fotos (hasta 3 s) y recién después el SDK y las consultas a Supabase.
+    if (store.hasCredentials()) await esperarPrimerasFotos(3000);
+    await store.ready();
+
+    var r = await Promise.all([
+      store.fetchSalas().catch(function () { return null; }),
+      store.fetchMensajes().catch(function () { return { fallo: true }; }),
+      store.fetchLikes().catch(function () { return null; })
+    ]);
+
+    if (r[0]) aplicarSalas(r[0].data);
+    if (r[2]) aplicarLikes(r[2].data);
+
+    state.mensajesCargados = true;
+    if (r[1] && !r[1].fallo) {
+      state.mensajes = r[1].data;
+      renderMensajes();
+    } else {
+      els.msgLista.innerHTML = '<div class="estado-vacio">No se pudieron cargar los mensajes. Revisá la conexión y volvé a abrir la página.</div>';
+    }
+    var chipMensajes = els.chipsSalas.querySelector('.c-msg');
+    if (chipMensajes) chipMensajes.textContent = 'Mensajes (' + state.mensajes.length + ')';
+  }
+
   async function init() {
     var route = parseInitialRoute();
     bindEvents();
 
     try {
-      var results = await Promise.all([
-        global.ExpoStore.fetchSalas(),
-        global.ExpoStore.fetchObras(),
-        global.ExpoStore.fetchMensajes()
-      ]);
-
-      state.salas = results[0].data;
-      state.obras = results[1].data;
-      state.mensajes = results[2].data;
-      state.mode = results[1].mode;
+      // Las fotos salen de obras.json: se dibuja la grilla apenas se lee, sin esperar a Supabase.
+      var res = await global.ExpoStore.fetchObras();
+      state.salas = global.ExpoStore.getSalasIniciales();
+      state.obras = res.data;
+      state.mode = res.mode;
 
       els.demoStrip.hidden = state.mode === 'live';
       updateQrArrivalBanner();
       renderNavAndSelects();
       renderSalas();
-      renderMensajes();
 
       if (route.obraId) {
         var idx = state.obras.findIndex(function (o) { return String(o.id) === String(route.obraId); });
@@ -539,8 +635,12 @@
       }
     } catch (err) {
       els.salasMain.innerHTML = '<div class="estado-vacio">Ocurrió un problema al cargar la muestra. Revisá la conexión o recargá la página.</div>';
-      showToast('Error al conectar con la galería.', true);
+      showToast('Error al cargar la galería.', true);
+      return;
     }
+
+    // Descripciones de las salas, contadores de Me gusta y mensajes: se completan al llegar, sin redibujar.
+    cargarDatosRemotos();
   }
 
   init();

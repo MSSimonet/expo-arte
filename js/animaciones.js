@@ -470,10 +470,12 @@
     };
   }
 
-  function buscarTarjeta(src) {
-    var imgs = el.salas.querySelectorAll('.obra-trigger img');
-    for (var i = 0; i < imgs.length; i++) {
-      if (imgs[i].src === src) return imgs[i];
+  // La grilla muestra la miniatura y el visor la versión grande (otra URL): la tarjeta se ubica por el id de la obra.
+  function buscarTarjeta(id) {
+    if (!id) return null;
+    var tarjetas = el.salas.querySelectorAll('.obra-card');
+    for (var i = 0; i < tarjetas.length; i++) {
+      if (tarjetas[i].getAttribute('data-obra-id') === id) return tarjetas[i].querySelector('.obra-trigger img');
     }
     return null;
   }
@@ -485,7 +487,7 @@
 
     el.visor.classList.add('cerrando');
     var duracion = 240;
-    var tarjeta = buscarTarjeta(el.vImg.src);
+    var tarjeta = buscarTarjeta(el.vImg.getAttribute('data-obra-id'));
     var hayZoom = el.vLienzo.classList.contains('zoom');
     if (tarjeta && !hayZoom && el.vImg.naturalWidth) {
       var desde = el.vImg.getBoundingClientRect();
@@ -509,6 +511,7 @@
   }
 
   function alCambiarImagenVisor() {
+    if (el.vImg.hasAttribute('data-hd')) return; // cambio de miniatura a versión grande de la MISMA obra: sin animación
     if (!el.visor.classList.contains('abierto') || reducido) return;
     var dir = 0;
     var dur = 220;
