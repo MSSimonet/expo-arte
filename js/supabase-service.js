@@ -14,7 +14,7 @@
     DEMO_LIKES: 'expo_demo_likes_v1'
   };
 
-  var OBRAS_JSON = 'obras.json';
+  var OBRAS_JSON = 'obras.json?v=2';
   var ID_FOTO = /^[0-9a-f]{16}$/;
 
   var _client = null;
