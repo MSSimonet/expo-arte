@@ -1,7 +1,7 @@
 {
  "version": 1,
  "opciones": "g1600q82-m480q74-v1",
- "generado": "2026-11-16T22:23:50.362Z",
+ "generado": "2026-11-16T23:17:20.209Z",
  "obras": [
   {
    "id": "39c9ed8c416cfc37",
@@ -1444,76 +1444,6 @@
    "alto_mini": 480,
    "v": "9b2a9963",
    "origen": "5/WhatsApp Image 2026-11-16 at 07.55.26_enmarcada.jpg"
-  },
-  {
-   "id": "e2d53d9fc9e64d42",
-   "grado": 5,
-   "autor": null,
-   "titulo": null,
-   "imagen": "assets/obras/5/e2d53d9fc9e64d42.webp",
-   "miniatura": "assets/obras/5/e2d53d9fc9e64d42-t.webp",
-   "ancho": 670,
-   "alto": 1044,
-   "ancho_mini": 308,
-   "alto_mini": 480,
-   "v": "0eddbd17",
-   "origen": "5/WhatsApp Video 2026-11-16 at 07.52.42_enmarcada.jpg"
-  },
-  {
-   "id": "54546e4c5dc6aa85",
-   "grado": 5,
-   "autor": null,
-   "titulo": null,
-   "imagen": "assets/obras/5/54546e4c5dc6aa85.webp",
-   "miniatura": "assets/obras/5/54546e4c5dc6aa85-t.webp",
-   "ancho": 670,
-   "alto": 1044,
-   "ancho_mini": 308,
-   "alto_mini": 480,
-   "v": "ce73b811",
-   "origen": "5/WhatsApp Video 2026-11-16 at 07.52.48_enmarcada.jpg"
-  },
-  {
-   "id": "77dee1883857f217",
-   "grado": 5,
-   "autor": null,
-   "titulo": null,
-   "imagen": "assets/obras/5/77dee1883857f217.webp",
-   "miniatura": "assets/obras/5/77dee1883857f217-t.webp",
-   "ancho": 670,
-   "alto": 1044,
-   "ancho_mini": 308,
-   "alto_mini": 480,
-   "v": "4eea64b5",
-   "origen": "5/WhatsApp Video 2026-11-16 at 07.55.15_enmarcada.jpg"
-  },
-  {
-   "id": "5119e81f97895c84",
-   "grado": 5,
-   "autor": null,
-   "titulo": null,
-   "imagen": "assets/obras/5/5119e81f97895c84.webp",
-   "miniatura": "assets/obras/5/5119e81f97895c84-t.webp",
-   "ancho": 670,
-   "alto": 1044,
-   "ancho_mini": 308,
-   "alto_mini": 480,
-   "v": "3e053426",
-   "origen": "5/WhatsApp Video 2026-11-16 at 07.55.17_enmarcada.jpg"
-  },
-  {
-   "id": "3c5d6969707d2eb5",
-   "grado": 5,
-   "autor": null,
-   "titulo": null,
-   "imagen": "assets/obras/5/3c5d6969707d2eb5.webp",
-   "miniatura": "assets/obras/5/3c5d6969707d2eb5-t.webp",
-   "ancho": 670,
-   "alto": 1044,
-   "ancho_mini": 308,
-   "alto_mini": 480,
-   "v": "6acf5c6f",
-   "origen": "5/WhatsApp Video 2026-11-16 at 07.55.19_enmarcada.jpg"
   },
   {
    "id": "bb171b725bf1bfbe",
