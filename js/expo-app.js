@@ -211,11 +211,15 @@
           var alt = 'Obra' + (obra.autor ? ' de ' + obra.autor : (obra.titulo ? ': ' + obra.titulo : '')) + ', ' + sala.grado + ' grado';
           var esPrioritaria = fotosDibujadas < PRIORIDAD_FOTOS;
           fotosDibujadas++;
+          // Proporción real de la foto (obras.json), limitada a 0,6–2,4; sin datos, la típica 1,3
+          var anchoFoto = Number(obra.ancho) || 0, altoFoto = Number(obra.alto) || 0;
+          var razon = (anchoFoto > 0 && altoFoto > 0) ? Math.min(2.4, Math.max(0.6, anchoFoto / altoFoto)) : 1.3;
+          var dimsImg = (anchoFoto > 0 && altoFoto > 0) ? ' width="' + anchoFoto + '" height="' + altoFoto + '"' : '';
           var atributosCarga = esPrioritaria ? ' fetchpriority="high" decoding="async"' : ' loading="lazy" fetchpriority="low" decoding="async"';
 
           html += '<article class="obra-card" data-obra-idx="' + idx + '" data-obra-id="' + escapeHtml(obra.id) + '">'
             + '<button type="button" class="obra-trigger" data-open-obra="' + idx + '" aria-label="Ver en grande: ' + escapeHtml(alt) + '">'
-            + '<span class="lienzo"><img src="' + escapeHtml(obra.thumb_url || obra.imagen_url) + '" alt="' + escapeHtml(alt) + '"' + atributosCarga + ' /></span>'
+            + '<span class="lienzo" style="--r:' + razon.toFixed(4) + '"><img src="' + escapeHtml(obra.thumb_url || obra.imagen_url) + '" alt="' + escapeHtml(alt) + '"' + dimsImg + atributosCarga + ' /></span>'
             + '</button>'
             + '<div class="obra-pie">'
             + '<div class="obra-meta">'
@@ -317,6 +321,7 @@
     state.currentObraIndex = idx;
     var sala = state.salas.find(function (s) { return s.id === Number(obra.sala_id); }) || { grado: obra.sala_id + '°' };
 
+    els.visor.setAttribute('data-sala-visor', String(obra.sala_id)); // la pared del visor toma el color del grado
     els.vLienzo.classList.remove('zoom');
     els.vZoomTxt.textContent = 'Acercar';
     els.vImg.removeAttribute('data-hd');

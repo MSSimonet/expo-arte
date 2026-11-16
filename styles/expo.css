@@ -525,38 +525,112 @@ main {
   background: rgba(255, 255, 255, 0.55);
 }
 
-/* ---------- Galería de obras ---------- */
+/* ---------- Galería de obras: sala de museo con pared en degradado ---------- */
+/* Cada sala es una pared de ancho completo: casi blanca arriba y cada vez más saturada con el color del
+   grado hacia abajo (--ombre-fin). Solo gradientes CSS: sin imágenes, filter ni backdrop-filter.
+   Los valores finales se fijan aquí (no dependen de --sala-N-soft, que en modo oscuro se vuelve oscuro). */
+:root { --pared-alta: #fbfaf7; --ombre-fin: #12a5b4; }
+.sala-1, .c1, body[data-sala="1"], .visor[data-sala-visor="1"] { --ombre-fin: #12a5b4; } /* turquesa */
+.sala-2, .c2, body[data-sala="2"], .visor[data-sala-visor="2"] { --ombre-fin: #7c5cd6; } /* lavanda */
+.sala-3, .c3, body[data-sala="3"], .visor[data-sala-visor="3"] { --ombre-fin: #2e7cd6; } /* azul */
+.sala-4, .c4, body[data-sala="4"], .visor[data-sala-visor="4"] { --ombre-fin: #1e9e57; } /* verde */
+.sala-5, .c5, body[data-sala="5"], .visor[data-sala-visor="5"] { --ombre-fin: #ef8a17; } /* ámbar */
+.sala-6, .c6, body[data-sala="6"], .visor[data-sala-visor="6"] { --ombre-fin: #df3e7c; } /* rosa */
+.sala-7, .c7, body[data-sala="7"], .visor[data-sala-visor="7"] { --ombre-fin: #5f6dbb; } /* gris azulado */
+
+/* La sala es la pared: el degradado y el zócalo ocupan todo el ancho de la pantalla, de arriba (cabecera) al pie */
+.sala {
+  position: relative;
+  isolation: isolate;
+  margin-top: 0;
+  padding-top: var(--sp-8);
+  padding-bottom: 28px; /* alto del zócalo */
+}
+@media (min-width: 780px) {
+  .sala { padding-top: var(--sp-10); }
+}
+.sala.destacada { margin-top: 0; padding-top: var(--sp-4); }
+.sala::before,
+.sala::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  width: 100vw;
+  margin-left: -50vw;
+  z-index: -1;
+  pointer-events: none;
+}
+.sala::before {
+  top: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, var(--pared-alta), var(--ombre-fin)); /* respaldo sin color-mix */
+}
+@supports (color: color-mix(in srgb, red 50%, blue)) {
+  .sala::before {
+    /* Curva suave (tipo smoothstep) con 10 paradas: sin bandas ni cortes visibles */
+    background: linear-gradient(to bottom,
+      var(--pared-alta) 0%,
+      color-mix(in srgb, var(--ombre-fin) 2%, var(--pared-alta)) 12%,
+      color-mix(in srgb, var(--ombre-fin) 8%, var(--pared-alta)) 24%,
+      color-mix(in srgb, var(--ombre-fin) 18%, var(--pared-alta)) 36%,
+      color-mix(in srgb, var(--ombre-fin) 32%, var(--pared-alta)) 48%,
+      color-mix(in srgb, var(--ombre-fin) 48%, var(--pared-alta)) 60%,
+      color-mix(in srgb, var(--ombre-fin) 64%, var(--pared-alta)) 72%,
+      color-mix(in srgb, var(--ombre-fin) 80%, var(--pared-alta)) 84%,
+      color-mix(in srgb, var(--ombre-fin) 94%, var(--pared-alta)) 94%,
+      var(--ombre-fin) 100%);
+  }
+}
+/* Zócalo: franja fina y clara al pie, con una sombra suave encima */
+.sala::after {
+  bottom: 0;
+  height: 28px;
+  background: linear-gradient(to bottom, #fbf8f0, #ebe4d4);
+  border-top: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 -7px 12px -6px rgba(40, 28, 16, 0.3);
+}
+/* Sala sin obras: el aviso va en una placa crema sobre la pared */
+.sala .estado-vacio {
+  background: #fbf6ea;
+  color: #4a453d;
+  border-color: rgba(60, 44, 28, 0.35);
+}
+
 .galeria {
+  --tinta: #26231f;        /* textos sobre la pastilla crema */
+  --tinta-suave: #4a453d;
+  --crema: #fbf6ea;
   display: grid;
-  gap: var(--sp-5) var(--sp-3);
-  margin-top: var(--sp-5);
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 34px 14px;
+  /* Cada obra se centra en su fila: las de distinto alto comparten una línea de colgado */
+  align-items: center;
+  margin: var(--sp-5) 0 0;
+  padding: 26px 2px 34px;
+  color: var(--tinta);
 }
 @media (min-width: 640px) {
   .galeria {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--sp-6) var(--sp-5);
+    gap: 50px 30px;
+    padding: 40px 12px 44px;
   }
 }
 @media (min-width: 1000px) {
   .galeria {
     grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 56px 34px;
   }
 }
 
 .obra-card {
   position: relative;
-  background: var(--paper);
-  color: #17232d;
-  border-radius: var(--radius-md);
-  padding: 8px 8px 10px;
-  box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
-  transition: transform var(--dur) var(--ease-out), box-shadow var(--dur) ease, scale 140ms var(--ease-out);
+  transition: scale 140ms var(--ease-out);
   animation: aparecer var(--dur-slow) var(--ease-out) both;
 }
-/* Presión al tocar la obra (toda la tarjeta, no solo la imagen) */
+/* Presión al tocar la obra */
 .obra-card:has(.obra-trigger:active) {
   scale: 0.97;
 }
@@ -565,29 +639,8 @@ main {
 .obra-card:nth-child(4) { animation-delay: 120ms; }
 .obra-card:nth-child(5) { animation-delay: 160ms; }
 .obra-card:nth-child(n+6) { animation-delay: 200ms; }
-@media (min-width: 700px) {
-  .obra-card:nth-child(3n) { transform: rotate(0.45deg); }
-  .obra-card:nth-child(3n+1) { transform: rotate(-0.55deg); }
-}
-@media (min-width: 700px) and (hover: hover) {
-  .obra-card:hover {
-    transform: rotate(0deg) translateY(-3px);
-    box-shadow: var(--shadow-lift);
-  }
-}
-.obra-card::before {
-  content: "";
-  position: absolute;
-  top: -7px;
-  left: 50%;
-  width: 54px;
-  height: 15px;
-  transform: translateX(-50%) rotate(-1.5deg);
-  background: var(--tape);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  border-radius: 2px;
-  pointer-events: none;
-  z-index: 1;
+@media (hover: hover) {
+  .obra-card:hover .obra-trigger { transform: translateY(-4px); }
 }
 
 .obra-trigger {
@@ -599,88 +652,122 @@ main {
   text-align: left;
   width: 100%;
   display: block;
-  border-radius: var(--radius-sm);
+  position: relative;
+  z-index: 1;
+  border-radius: 3px;
+  transition: transform var(--dur) var(--ease-out);
+}
+/* Aro de foco doble (blanco + oscuro): se distingue sobre cualquier tono de la pared */
+.obra-trigger:focus-visible,
+.like-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px #ffffff, 0 0 0 6px #17232d;
 }
 .obra-trigger .lienzo {
   display: block;
-  border-radius: var(--radius-sm);
+  border-radius: 3px;
   overflow: hidden;
-  background: #efeae0;
-  aspect-ratio: 4 / 3;
+  /* Solo se ve mientras carga la foto; después la imagen cubre todo (la caja tiene su proporción real) */
+  background: rgba(70, 52, 32, 0.1);
+  /* --r (ancho/alto de la obra, entre 0,6 y 2,4) la fija el JS; 1,3 es la proporción típica antes de saberla */
+  aspect-ratio: var(--r, 1.3);
+  /* Sombra proyectada sobre la pared: cálida y suave (sin filter) */
+  box-shadow:
+    0 1px 2px rgba(60, 40, 20, 0.34),
+    0 9px 14px -4px rgba(60, 40, 20, 0.3),
+    0 20px 28px -12px rgba(60, 40, 20, 0.26);
 }
 .obra-trigger .lienzo img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
-  transition: transform var(--dur-slow) var(--ease-out);
-}
-@media (hover: hover) {
-  .obra-trigger:hover .lienzo img { transform: scale(1.04); }
 }
 
+/* Debajo de cada obra: placa de museo (si hay autor/título) y pastilla del corazón, ambas cremas casi opacas.
+   Su contraste no depende del color de la pared. */
 .obra-pie {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--sp-2);
-  margin-top: var(--sp-2);
-  padding: 0 2px;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 8px;
+  min-height: var(--tap);
 }
 .obra-meta {
   min-width: 0;
-  flex: 1 1 auto;
+  flex: 0 1 auto;
+  background: rgba(251, 246, 234, 0.96);
+  border-radius: 6px;
+  padding: 4px 10px;
+  box-shadow: 0 1px 2px rgba(60, 40, 20, 0.22);
 }
 .obra-autor {
   display: block;
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-weight: 800;
-  font-size: 1.02rem;
-  line-height: 1.2;
-  color: #17232d;
-  overflow-wrap: break-word;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.3;
+  color: var(--tinta);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-/* Obra sin autor ni título: no se muestra relleno; el corazón queda a la derecha (.obra-meta ocupa el resto) */
-.obra-autor.sin-firma {
+/* Obra sin autor ni título: no hay placa; queda solo la pastilla del corazón, centrada */
+.obra-autor.sin-firma,
+.obra-meta:has(> .obra-autor.sin-firma:only-child) {
   display: none;
 }
 .obra-titulo {
   display: block;
-  font-size: 0.84rem;
-  color: #516575;
+  font-size: 0.68rem;
+  font-style: italic;
+  color: var(--tinta-suave);
   font-weight: 600;
-  line-height: 1.25;
-  margin-top: 0.12rem;
+  line-height: 1.3;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* ---------- Me gusta (tarjeta) ---------- */
+/* ---------- Me gusta (pastilla) ---------- */
+/* El botón mide 44 px (área táctil); la pastilla crema visible es el ::before, más baja */
 .like-btn {
   appearance: none;
-  border: 1.5px solid #e4ddd0;
-  background: #faf8f3;
-  color: #364958;
+  border: 0;
+  background: transparent;
+  color: var(--tinta);
+  position: relative;
+  isolation: isolate;
   border-radius: var(--radius-pill);
   min-height: var(--tap);
   min-width: var(--tap);
-  padding: 0 0.7rem;
+  padding: 0 0.75rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.3rem;
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 0.9rem;
+  font-size: 0.86rem;
   font-variant-numeric: tabular-nums;
   cursor: pointer;
   flex: 0 0 auto;
-  transition:
-    transform var(--dur-fast) var(--ease-out),
-    background-color var(--dur) ease,
-    border-color var(--dur) ease,
-    color var(--dur) ease;
+  transition: transform var(--dur-fast) var(--ease-out), color var(--dur) ease;
+}
+.like-btn::before {
+  content: "";
+  position: absolute;
+  inset: 6px 0;
+  z-index: -1;
+  border-radius: var(--radius-pill);
+  background: rgba(251, 246, 234, 0.97);
+  box-shadow: 0 1px 2px rgba(60, 40, 20, 0.28);
+  transition: background-color var(--dur) ease;
 }
 .like-btn svg {
   width: 18px;
@@ -690,20 +777,20 @@ main {
   stroke-width: 2.1;
 }
 .like-btn[aria-pressed="true"] {
-  background: #fde7e5;
-  border-color: rgba(217, 46, 37, 0.38);
-  color: #b3211a;
+  color: #8a1610;
 }
 .like-btn[aria-pressed="true"] svg {
-  fill: #d92e25;
-  stroke: #d92e25;
+  fill: #b8231b;
+  stroke: #b8231b;
   animation: latido var(--dur-slow) var(--ease-spring);
 }
 .like-btn:active {
   transform: scale(0.92);
 }
 @media (hover: hover) {
-  .like-btn:hover { border-color: rgba(217, 46, 37, 0.38); }
+  .like-btn:hover { color: #000000; }
+  .like-btn:hover::before { background: #ffffff; }
+  .like-btn[aria-pressed="true"]:hover { color: #6e0f0a; }
 }
 
 .estado-vacio {
@@ -949,15 +1036,16 @@ footer {
   animation: fundido var(--dur) ease both;
 }
 .visor-marco {
-  /* El visor es siempre "papel" claro, también en modo oscuro */
-  --surface: #ffffff;
-  --surface-alt: #f0ebe0;
+  /* El visor es siempre de pared clara en degradado (la del grado de la obra), también en modo oscuro */
+  --surface: #fffdf8;
+  --surface-alt: #f3eee2;
   --ink: #17232d;
   --ink-soft: #364958;
-  --line: #dfd6c3;
-  --line-strong: #cbbfa6;
+  --line: #d9d0be;
+  --line-strong: #bfb39a;
   --focus-ring: #17232d;
-  background: var(--paper);
+  background: #f1eee6;
+  background: linear-gradient(to bottom, var(--pared-alta), color-mix(in srgb, var(--ombre-fin) 38%, var(--pared-alta)));
   color: #17232d;
   width: 100%;
   max-width: 760px;
@@ -994,9 +1082,9 @@ footer {
   margin-bottom: auto;
 }
 .visor-lienzo {
-  border-radius: var(--radius-md);
+  border-radius: 3px;
   overflow: auto;
-  background: #f3efe6;
+  background: transparent; /* la obra ya trae su marco: se ve sobre la pared clara */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1032,19 +1120,19 @@ footer {
   text-wrap: balance;
 }
 .v-titulo {
-  color: #364958;
+  color: #33414d;
   font-weight: 700;
   font-size: 1rem;
   margin-top: 0.2rem;
 }
 .v-donde {
-  color: #516575;
+  color: #3a4753;
   font-weight: 700;
   font-size: 0.92rem;
   margin-top: 0.22rem;
 }
 .v-desc {
-  color: #364958;
+  color: #33414d;
   font-size: 0.95rem;
   line-height: 1.5;
   margin: var(--sp-2) auto 0;
@@ -1078,11 +1166,11 @@ footer {
 #vLike[aria-pressed="true"] {
   background: #fde7e5;
   border-color: rgba(217, 46, 37, 0.42);
-  color: #b3211a;
+  color: #8a1610;
 }
 #vLike[aria-pressed="true"] svg {
-  fill: #d92e25;
-  stroke: #d92e25;
+  fill: #b8231b;
+  stroke: #b8231b;
   animation: latido var(--dur-slow) var(--ease-spring);
 }
 
@@ -1267,22 +1355,14 @@ footer {
 }
 .anim-js .obra-card {
   animation: none;
-  transform-origin: 50% 0; /* cuelga de la cinta */
   transition:
-    transform var(--dur) var(--ease-out),
-    box-shadow var(--dur) ease,
     scale 140ms var(--ease-out),
     opacity 420ms var(--ease-out),
-    translate var(--dur-enter) var(--ease-out),
-    rotate 640ms var(--ease-spring);
+    translate var(--dur-enter) var(--ease-out);
 }
 .anim-js .obra-card:not(.revelada) {
   opacity: 0;
   translate: 0 18px;
-  rotate: -3deg;
-}
-.anim-js .obra-card:nth-child(even):not(.revelada) {
-  rotate: 2.5deg;
 }
 
 /* ---------- Me gusta ---------- */
@@ -1413,28 +1493,32 @@ footer {
   border-radius: var(--radius-lg);
 }
 .esq-galeria {
+  /* Misma geometría que .galeria: no hay salto al reemplazar el esqueleto */
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--sp-5) var(--sp-3);
-  margin-top: var(--sp-5);
+  gap: 34px 14px;
+  align-items: center;
+  margin: var(--sp-5) 0 0;
+  padding: 26px 2px 34px;
 }
 @media (min-width: 640px) {
-  .esq-galeria { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sp-6) var(--sp-5); }
+  .esq-galeria { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 50px 30px; padding: 40px 12px 44px; }
+}
+@media (min-width: 1000px) {
+  .esq-galeria { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 56px 34px; }
 }
 .esq-card {
-  background: var(--surface);
-  border-radius: var(--radius-md);
-  padding: 8px 8px 12px;
-  box-shadow: var(--shadow-sm);
+  padding: 0;
 }
+/* Misma proporción típica que la tarjeta real (--r por defecto): no hay salto al reemplazar el esqueleto */
 .esq-lienzo {
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 1.3;
 }
 .esq-linea {
-  height: 14px;
-  width: 62%;
-  margin-top: var(--sp-3);
-  border-radius: var(--radius-pill);
+  height: 44px; /* alto de la placa (corazón de 44 px) */
+  width: 100%;
+  margin-top: 10px;
+  border-radius: 3px;
 }
 .esqueleto.esq-mensajes {
   margin-top: 0;
