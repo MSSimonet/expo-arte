@@ -211,9 +211,9 @@
           var alt = 'Obra' + (obra.autor ? ' de ' + obra.autor : (obra.titulo ? ': ' + obra.titulo : '')) + ', ' + sala.grado + ' grado';
           var esPrioritaria = fotosDibujadas < PRIORIDAD_FOTOS;
           fotosDibujadas++;
-          // Proporción real de la foto (obras.json), limitada a 0,6–2,4; sin datos, la típica 1,3
+          // Proporción real de la foto (obras.json), limitada a 0,4–2,4; sin datos, la típica 1,3
           var anchoFoto = Number(obra.ancho) || 0, altoFoto = Number(obra.alto) || 0;
-          var razon = (anchoFoto > 0 && altoFoto > 0) ? Math.min(2.4, Math.max(0.6, anchoFoto / altoFoto)) : 1.3;
+          var razon = (anchoFoto > 0 && altoFoto > 0) ? Math.min(2.4, Math.max(0.4, anchoFoto / altoFoto)) : 1.3;
           var dimsImg = (anchoFoto > 0 && altoFoto > 0) ? ' width="' + anchoFoto + '" height="' + altoFoto + '"' : '';
           var atributosCarga = esPrioritaria ? ' fetchpriority="high" decoding="async"' : ' loading="lazy" fetchpriority="low" decoding="async"';
 
