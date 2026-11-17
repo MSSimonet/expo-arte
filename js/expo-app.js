@@ -186,17 +186,6 @@
   function iconoPausa() {
     return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5h3v14H8zM13 5h3v14h-3z" fill="currentColor"/></svg>';
   }
-  function reducirMovimiento() {
-    return !!(global.matchMedia && global.matchMedia('(prefers-reduced-motion: reduce)').matches);
-  }
-  /** Sin reproducción automática con movimiento reducido, ahorro de datos o conexión 2g / slow-2g */
-  function autoplayPermitido() {
-    if (reducirMovimiento()) return false;
-    var c = global.navigator.connection || global.navigator.mozConnection || global.navigator.webkitConnection;
-    if (c && (c.saveData || c.effectiveType === 'slow-2g' || c.effectiveType === '2g')) return false;
-    return true;
-  }
-
   /**
    * obras.json trae tipo/video, pero ExpoStore no los pasa. Se "escucha" la misma lectura que hace ExpoStore
    * (se clona su respuesta): sin una segunda descarga. Devuelve { promesa, soltar }.
@@ -239,100 +228,6 @@
     });
   }
 
-  var videosGrilla = { io: null, visibles: new Map(), listo: false, cajas: [] };
-  var MAX_VIDEOS_A_LA_VEZ = 2;
-
-  function videoDe(caja) { return caja.querySelector('video'); }
-
-  function reproducirEnGrilla(caja) {
-    var v = videoDe(caja);
-    if (!v) return;
-    if (!v.getAttribute('src')) {
-      // El póster del <video> se asigna recién al reproducir: un poster= en el HTML se descargaría de entrada
-      if (!v.getAttribute('poster')) v.setAttribute('poster', v.getAttribute('data-poster'));
-      v.setAttribute('src', v.getAttribute('data-src'));
-    }
-    v.muted = true;
-    if (v.paused) {
-      var p = v.play();
-      if (p && p.catch) {
-        p.catch(function () {
-          // El navegador bloqueó play(): queda el póster con su botón, sin errores
-          caja.classList.remove('reproduciendo');
-          caja.classList.add('video-bloqueado');
-        });
-      }
-    }
-  }
-  function pausarEnGrilla(caja) {
-    var v = videoDe(caja);
-    if (v && !v.paused) v.pause();
-  }
-  function pausarTodosEnGrilla() {
-    videosGrilla.cajas.forEach(pausarEnGrilla);
-  }
-
-  /** Decide cuáles se reproducen: los pedidos con el botón y, si hay permiso, los visibles; máximo 2 a la vez */
-  function ajustarVideos() {
-    if (!videosGrilla.listo || document.hidden || els.visor.classList.contains('abierto')) return;
-    var auto = autoplayPermitido();
-    var visibles = videosGrilla.cajas.filter(function (c) { return videosGrilla.visibles.has(c); });
-    var elegidos = visibles.filter(function (c) { return c.getAttribute('data-manual') === '1'; });
-    if (auto) {
-      visibles.forEach(function (c) {
-        if (elegidos.length < MAX_VIDEOS_A_LA_VEZ && elegidos.indexOf(c) === -1) elegidos.push(c);
-      });
-    }
-    elegidos = elegidos.slice(0, MAX_VIDEOS_A_LA_VEZ);
-    videosGrilla.cajas.forEach(function (c) {
-      if (elegidos.indexOf(c) !== -1) reproducirEnGrilla(c); else pausarEnGrilla(c);
-    });
-  }
-
-  function prepararVideos() {
-    if (videosGrilla.io) { videosGrilla.io.disconnect(); videosGrilla.io = null; }
-    videosGrilla.visibles = new Map();
-    videosGrilla.listo = false;
-    videosGrilla.cajas = Array.prototype.slice.call(els.salasMain.querySelectorAll('.obra-video'));
-    if (!videosGrilla.cajas.length) return;
-
-    videosGrilla.cajas.forEach(function (caja) {
-      var v = videoDe(caja);
-      v.addEventListener('playing', function () { caja.classList.add('reproduciendo'); caja.classList.remove('video-bloqueado'); });
-      v.addEventListener('pause', function () { caja.classList.remove('reproduciendo'); });
-      v.addEventListener('error', function () { caja.classList.remove('reproduciendo'); });
-      var boton = caja.querySelector('.video-play');
-      if (boton) {
-        boton.addEventListener('click', function (e) {
-          e.stopPropagation();
-          // Tocar el botón reproduce ese video (aunque no haya reproducción automática) y deja como máximo 2
-          videosGrilla.cajas.forEach(function (c) { if (c !== caja && c.getAttribute('data-manual') === '1' && videosGrilla.cajas.filter(function (x) { return x.classList.contains('reproduciendo'); }).length >= MAX_VIDEOS_A_LA_VEZ) { c.removeAttribute('data-manual'); pausarEnGrilla(c); } });
-          caja.setAttribute('data-manual', '1');
-          videosGrilla.visibles.set(caja, 1);
-          videosGrilla.listo = true;
-          ajustarVideos();
-        });
-      }
-    });
-
-    if (!('IntersectionObserver' in global)) return;
-    videosGrilla.io = new global.IntersectionObserver(function (entradas) {
-      entradas.forEach(function (e) {
-        if (e.isIntersecting && e.intersectionRatio >= 0.5) {
-          videosGrilla.visibles.set(e.target, e.intersectionRatio);
-        } else {
-          videosGrilla.visibles.delete(e.target);
-          e.target.removeAttribute('data-manual'); // al salir de pantalla se pausa y se pierde el pedido manual
-        }
-      });
-      ajustarVideos();
-    }, { threshold: [0, 0.5, 1] });
-    videosGrilla.cajas.forEach(function (c) { videosGrilla.io.observe(c); });
-
-    // Los videos no compiten con las primeras fotos: recién empiezan cuando ellas cargaron
-    esperarPrimerasFotos(4000).then(function () { videosGrilla.listo = true; ajustarVideos(); });
-  }
-
   function renderSalas() {
     var orderedSalas = getOrderedSalas();
     var html = '';
@@ -343,17 +238,20 @@
       var isHighlighted = state.qrSalaId === sala.id;
 
       html += '<section class="sala sala-' + sala.id + (isHighlighted ? ' destacada' : '') + '" id="sala-' + sala.id + '" aria-label="Sala de ' + escapeHtml(sala.grado) + ' grado">';
-      html += '<div class="sala-cabecera">'
-        + '<h2>' + escapeHtml(sala.grado) + ' <em>grado</em></h2>'
-        + '<div class="sala-subbar">'
-        + '<span class="pastilla">' + escapeHtml(sala.nombre) + ' · ' + obrasSala.length + (obrasSala.length === 1 ? ' obra' : ' obras') + '</span>'
-        + '</div>';
-
+      var bannerUrl = 'assets/banners/banner-sala-' + sala.id + '.webp';
+      var bannerSmUrl = 'assets/banners/banner-sala-' + sala.id + '-sm.webp';
       var desc = sala.desc_a || sala.desc_b || '';
-      if (desc) {
-        html += '<p class="sala-desc">' + escapeHtml(desc) + '</p>';
-      }
-      html += '</div>';
+      var altBanner = sala.grado + ' grado — ' + (desc || sala.nombre);
+
+      html += '<div class="sala-cabecera-banner">'
+        + '<h2 class="sr-only">' + escapeHtml(sala.grado) + ' grado — ' + escapeHtml(sala.nombre) + '</h2>'
+        + '<picture>'
+        + '<source srcset="' + bannerSmUrl + '" media="(max-width: 600px)" type="image/webp" />'
+        + '<source srcset="' + bannerUrl + '" type="image/webp" />'
+        + '<img class="sala-banner-img" src="' + bannerUrl + '" alt="' + escapeHtml(altBanner) + '" width="2048" height="508" loading="lazy" decoding="async" />'
+        + '</picture>'
+        + '<div class="sala-subbar"><span class="pastilla">' + escapeHtml(sala.nombre) + ' · ' + obrasSala.length + (obrasSala.length === 1 ? ' obra' : ' obras') + '</span></div>'
+        + '</div>';
 
       if (!obrasSala.length) {
         html += '<div class="estado-vacio">Todavía no se cargaron obras en ' + escapeHtml(sala.grado) + ' grado.</div>';
@@ -380,16 +278,12 @@
           if (esVideo) {
             var altV = 'Animación, ' + sala.grado + ' grado';
             var poster = escapeHtml(obra.thumb_url || obra.imagen_url);
-            cuerpo = '<div class="video-caja">'
-              + '<button type="button" class="obra-trigger" data-open-obra="' + idx + '" aria-label="Ver en grande: ' + escapeHtml(altV) + '">'
+            cuerpo = '<button type="button" class="obra-trigger" data-open-obra="' + idx + '" aria-label="Ver en grande y reproducir: ' + escapeHtml(altV) + '">'
               + '<span class="lienzo marco-video"><span class="perf" aria-hidden="true"></span>'
               + '<span class="pantalla" style="--r:' + razon.toFixed(4) + '"><img src="' + poster + '" alt="' + escapeHtml(altV) + '"' + dimsImg + atributosCarga + ' />'
-              + '<video muted loop playsinline preload="none" disablepictureinpicture disableremoteplayback data-poster="' + poster + '" data-src="' + escapeHtml(obra.video_url) + '" tabindex="-1" aria-hidden="true"></video>'
-              + '<span class="video-pastilla">Animación</span></span>'
+              + '<span class="video-pastilla">Animación</span><span class="video-play" aria-hidden="true">' + iconoPlay() + '</span></span>'
               + '<span class="perf" aria-hidden="true"></span></span>'
-              + '</button>'
-              + '<button type="button" class="video-play" aria-label="Reproducir la animación">' + iconoPlay() + '</button>'
-              + '</div>';
+              + '</button>';
           } else {
             cuerpo = '<button type="button" class="obra-trigger" data-open-obra="' + idx + '" aria-label="Ver en grande: ' + escapeHtml(alt) + '">'
               + '<span class="lienzo" style="--r:' + razon.toFixed(4) + '"><img src="' + escapeHtml(obra.thumb_url || obra.imagen_url) + '" alt="' + escapeHtml(alt) + '"' + dimsImg + atributosCarga + ' /></span>'
@@ -415,7 +309,6 @@
     });
 
     els.salasMain.innerHTML = html;
-    prepararVideos();
   }
 
   function renderMensajes() {
@@ -547,11 +440,9 @@
       els.vVideo.poster = obra.thumb_url || obra.imagen_url;
       els.vVideo.setAttribute('src', obra.video_url);
       actualizarControlesVideo();
-      // Con movimiento reducido espera el toque en reproducir; si no, arranca solo (muted)
-      if (!reducirMovimiento()) {
-        var pv = els.vVideo.play();
-        if (pv && pv.catch) pv.catch(function () { actualizarControlesVideo(); });
-      }
+      // El toque que abrió el visor habilita la reproducción (muted, sin sonido): empieza en ese momento
+      var pv = els.vVideo.play();
+      if (pv && pv.catch) pv.catch(function () { actualizarControlesVideo(); });
     }
 
     var liked = global.ExpoStore.isObraLiked(obra.id);
@@ -599,7 +490,6 @@
   }
 
   function openVisor(idx) {
-    pausarTodosEnGrilla();
     showObraInVisor(idx);
     els.visor.classList.add('abierto');
     document.body.style.overflow = 'hidden';
@@ -610,7 +500,6 @@
     els.visor.classList.remove('abierto');
     document.body.style.overflow = '';
     liberarVideoVisor();
-    ajustarVideos();
   }
 
   function stepVisor(delta) {
@@ -727,7 +616,7 @@
       if (v && v.duration > 0) v.currentTime = v.duration * (Number(els.vProg.value) / 1000);
     });
     document.addEventListener('visibilitychange', function () {
-      if (document.hidden) { pausarTodosEnGrilla(); if (els.vVideo && !els.vVideo.paused) els.vVideo.pause(); } else { ajustarVideos(); }
+      if (document.hidden && els.vVideo && !els.vVideo.paused) els.vVideo.pause();
     });
     els.visor.addEventListener('click', function (e) {
       if (e.target === els.visor) closeVisor();
@@ -791,9 +680,14 @@
     state.salas = rows;
     rows.forEach(function (sala) {
       var seccion = document.getElementById('sala-' + sala.id);
-      var cabecera = seccion && seccion.querySelector('.sala-cabecera');
-      if (!cabecera) return;
+      if (!seccion) return;
       var texto = sala.desc_a || sala.desc_b || '';
+      var img = seccion.querySelector('.sala-banner-img');
+      if (img && texto) {
+        img.alt = sala.grado + ' grado — ' + texto;
+      }
+      var cabecera = seccion.querySelector('.sala-cabecera');
+      if (!cabecera) return;
       var p = cabecera.querySelector('.sala-desc');
       if (!texto) {
         if (p) p.remove();

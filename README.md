@@ -49,7 +49,7 @@ Los videos son archivos `.mp4` y se cargan igual que las fotos: se copian a la c
 - **Ignora la imagen fija** que tenga un video con el mismo nombre base (sin contar un final `_enmarcado` / `_enmarcada`): el póster sale del video.
 - Es incremental: el video que no cambió no se vuelve a procesar.
 
-**En la muestra:** los videos se reproducen solos (mudos, en bucle) solo cuando están a la vista y después de que cargaron las primeras fotos, y **máximo 2 a la vez**. Con movimiento reducido, ahorro de datos o conexión 2g **no** se reproducen solos: se ve el póster y se tocan para reproducir. En el visor llevan botón de reproducir/pausa y barra de progreso, sin volumen.
+**En la muestra:** los videos **no se reproducen solos, nunca**: en la grilla cada uno se ve como su póster con el marco de proyección, la pastilla *Animación* y el ícono de reproducir, y **no se descarga ningún mp4** hasta que alguien lo toca. Al tocarlo se abre el visor y el video empieza ahí mismo (mudo, en bucle), con botón de reproducir/pausa y barra de progreso, sin control de volumen. Cerrar o pasar a otra obra lo pausa y lo libera.
 
 ### Importante: los videos de `Obras/5` y los que hoy están publicados
 
