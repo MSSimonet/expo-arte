@@ -40,6 +40,10 @@
     visor: document.getElementById('visor'),
     vLienzo: document.getElementById('vLienzo'),
     vImg: document.getElementById('vImg'),
+    vVideo: document.getElementById('vVideo'),
+    vVideoCtl: document.getElementById('vVideoCtl'),
+    vPlay: document.getElementById('vPlay'),
+    vProg: document.getElementById('vProg'),
     vAutor: document.getElementById('vAutor'),
     vTitulo: document.getElementById('vTitulo'),
     vDonde: document.getElementById('vDonde'),
@@ -175,6 +179,160 @@
     return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   }
 
+  /* ---------- Videos (obras tipo "video": animaciones, sin sonido) ---------- */
+  function iconoPlay() {
+    return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.2v13.6a1 1 0 0 0 1.5.86l11-6.8a1 1 0 0 0 0-1.72l-11-6.8A1 1 0 0 0 8 5.2z" fill="currentColor"/></svg>';
+  }
+  function iconoPausa() {
+    return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5h3v14H8zM13 5h3v14h-3z" fill="currentColor"/></svg>';
+  }
+  function reducirMovimiento() {
+    return !!(global.matchMedia && global.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  }
+  /** Sin reproducción automática con movimiento reducido, ahorro de datos o conexión 2g / slow-2g */
+  function autoplayPermitido() {
+    if (reducirMovimiento()) return false;
+    var c = global.navigator.connection || global.navigator.mozConnection || global.navigator.webkitConnection;
+    if (c && (c.saveData || c.effectiveType === 'slow-2g' || c.effectiveType === '2g')) return false;
+    return true;
+  }
+
+  /**
+   * obras.json trae tipo/video, pero ExpoStore no los pasa. Se "escucha" la misma lectura que hace ExpoStore
+   * (se clona su respuesta): sin una segunda descarga. Devuelve { promesa, soltar }.
+   */
+  function escucharObrasJson() {
+    var original = global.fetch;
+    var resolver;
+    var promesa = new Promise(function (res) { resolver = res; });
+    function mapaDesde(json) {
+      var mapa = {};
+      (json && json.obras || []).forEach(function (o) {
+        if (o && o.tipo === 'video' && o.video) mapa[String(o.id)] = o;
+      });
+      return mapa;
+    }
+    if (typeof original !== 'function') { resolver({}); return { promesa: promesa, soltar: function () {} }; }
+    global.fetch = function (entrada) {
+      var url = typeof entrada === 'string' ? entrada : (entrada && entrada.url) || '';
+      var p = original.apply(this, arguments);
+      if (/(^|\/)obras\.json(\?|$)/.test(url)) {
+        global.fetch = original;
+        p.then(function (r) { return r.clone().json(); })
+          .then(function (json) { resolver(mapaDesde(json)); })
+          .catch(function () { resolver({}); });
+      }
+      return p;
+    };
+    return {
+      promesa: promesa,
+      soltar: function () { global.fetch = original; }
+    };
+  }
+  function aplicarDatosDeVideos(mapa) {
+    state.obras.forEach(function (o) {
+      var d = mapa[String(o.id)];
+      if (!d) return;
+      o.tipo = 'video';
+      o.video_url = String(d.video) + (d.v ? '?v=' + encodeURIComponent(d.v) : '');
+      o.duracion = d.duracion || null;
+    });
+  }
+
+  var videosGrilla = { io: null, visibles: new Map(), listo: false, cajas: [] };
+  var MAX_VIDEOS_A_LA_VEZ = 2;
+
+  function videoDe(caja) { return caja.querySelector('video'); }
+
+  function reproducirEnGrilla(caja) {
+    var v = videoDe(caja);
+    if (!v) return;
+    if (!v.getAttribute('src')) {
+      // El póster del <video> se asigna recién al reproducir: un poster= en el HTML se descargaría de entrada
+      if (!v.getAttribute('poster')) v.setAttribute('poster', v.getAttribute('data-poster'));
+      v.setAttribute('src', v.getAttribute('data-src'));
+    }
+    v.muted = true;
+    if (v.paused) {
+      var p = v.play();
+      if (p && p.catch) {
+        p.catch(function () {
+          // El navegador bloqueó play(): queda el póster con su botón, sin errores
+          caja.classList.remove('reproduciendo');
+          caja.classList.add('video-bloqueado');
+        });
+      }
+    }
+  }
+  function pausarEnGrilla(caja) {
+    var v = videoDe(caja);
+    if (v && !v.paused) v.pause();
+  }
+  function pausarTodosEnGrilla() {
+    videosGrilla.cajas.forEach(pausarEnGrilla);
+  }
+
+  /** Decide cuáles se reproducen: los pedidos con el botón y, si hay permiso, los visibles; máximo 2 a la vez */
+  function ajustarVideos() {
+    if (!videosGrilla.listo || document.hidden || els.visor.classList.contains('abierto')) return;
+    var auto = autoplayPermitido();
+    var visibles = videosGrilla.cajas.filter(function (c) { return videosGrilla.visibles.has(c); });
+    var elegidos = visibles.filter(function (c) { return c.getAttribute('data-manual') === '1'; });
+    if (auto) {
+      visibles.forEach(function (c) {
+        if (elegidos.length < MAX_VIDEOS_A_LA_VEZ && elegidos.indexOf(c) === -1) elegidos.push(c);
+      });
+    }
+    elegidos = elegidos.slice(0, MAX_VIDEOS_A_LA_VEZ);
+    videosGrilla.cajas.forEach(function (c) {
+      if (elegidos.indexOf(c) !== -1) reproducirEnGrilla(c); else pausarEnGrilla(c);
+    });
+  }
+
+  function prepararVideos() {
+    if (videosGrilla.io) { videosGrilla.io.disconnect(); videosGrilla.io = null; }
+    videosGrilla.visibles = new Map();
+    videosGrilla.listo = false;
+    videosGrilla.cajas = Array.prototype.slice.call(els.salasMain.querySelectorAll('.obra-video'));
+    if (!videosGrilla.cajas.length) return;
+
+    videosGrilla.cajas.forEach(function (caja) {
+      var v = videoDe(caja);
+      v.addEventListener('playing', function () { caja.classList.add('reproduciendo'); caja.classList.remove('video-bloqueado'); });
+      v.addEventListener('pause', function () { caja.classList.remove('reproduciendo'); });
+      v.addEventListener('error', function () { caja.classList.remove('reproduciendo'); });
+      var boton = caja.querySelector('.video-play');
+      if (boton) {
+        boton.addEventListener('click', function (e) {
+          e.stopPropagation();
+          // Tocar el botón reproduce ese video (aunque no haya reproducción automática) y deja como máximo 2
+          videosGrilla.cajas.forEach(function (c) { if (c !== caja && c.getAttribute('data-manual') === '1' && videosGrilla.cajas.filter(function (x) { return x.classList.contains('reproduciendo'); }).length >= MAX_VIDEOS_A_LA_VEZ) { c.removeAttribute('data-manual'); pausarEnGrilla(c); } });
+          caja.setAttribute('data-manual', '1');
+          videosGrilla.visibles.set(caja, 1);
+          videosGrilla.listo = true;
+          ajustarVideos();
+        });
+      }
+    });
+
+    if (!('IntersectionObserver' in global)) return;
+    videosGrilla.io = new global.IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) {
+        if (e.isIntersecting && e.intersectionRatio >= 0.5) {
+          videosGrilla.visibles.set(e.target, e.intersectionRatio);
+        } else {
+          videosGrilla.visibles.delete(e.target);
+          e.target.removeAttribute('data-manual'); // al salir de pantalla se pausa y se pierde el pedido manual
+        }
+      });
+      ajustarVideos();
+    }, { threshold: [0, 0.5, 1] });
+    videosGrilla.cajas.forEach(function (c) { videosGrilla.io.observe(c); });
+
+    // Los videos no compiten con las primeras fotos: recién empiezan cuando ellas cargaron
+    esperarPrimerasFotos(4000).then(function () { videosGrilla.listo = true; ajustarVideos(); });
+  }
+
   function renderSalas() {
     var orderedSalas = getOrderedSalas();
     var html = '';
@@ -217,10 +375,29 @@
           var dimsImg = (anchoFoto > 0 && altoFoto > 0) ? ' width="' + anchoFoto + '" height="' + altoFoto + '"' : '';
           var atributosCarga = esPrioritaria ? ' fetchpriority="high" decoding="async"' : ' loading="lazy" fetchpriority="low" decoding="async"';
 
-          html += '<article class="obra-card" data-obra-idx="' + idx + '" data-obra-id="' + escapeHtml(obra.id) + '">'
-            + '<button type="button" class="obra-trigger" data-open-obra="' + idx + '" aria-label="Ver en grande: ' + escapeHtml(alt) + '">'
-            + '<span class="lienzo" style="--r:' + razon.toFixed(4) + '"><img src="' + escapeHtml(obra.thumb_url || obra.imagen_url) + '" alt="' + escapeHtml(alt) + '"' + dimsImg + atributosCarga + ' /></span>'
-            + '</button>'
+          var esVideo = obra.tipo === 'video' && obra.video_url;
+          var cuerpo;
+          if (esVideo) {
+            var altV = 'Animación, ' + sala.grado + ' grado';
+            var poster = escapeHtml(obra.thumb_url || obra.imagen_url);
+            cuerpo = '<div class="video-caja">'
+              + '<button type="button" class="obra-trigger" data-open-obra="' + idx + '" aria-label="Ver en grande: ' + escapeHtml(altV) + '">'
+              + '<span class="lienzo marco-video"><span class="perf" aria-hidden="true"></span>'
+              + '<span class="pantalla" style="--r:' + razon.toFixed(4) + '"><img src="' + poster + '" alt="' + escapeHtml(altV) + '"' + dimsImg + atributosCarga + ' />'
+              + '<video muted loop playsinline preload="none" disablepictureinpicture disableremoteplayback data-poster="' + poster + '" data-src="' + escapeHtml(obra.video_url) + '" tabindex="-1" aria-hidden="true"></video>'
+              + '<span class="video-pastilla">Animación</span></span>'
+              + '<span class="perf" aria-hidden="true"></span></span>'
+              + '</button>'
+              + '<button type="button" class="video-play" aria-label="Reproducir la animación">' + iconoPlay() + '</button>'
+              + '</div>';
+          } else {
+            cuerpo = '<button type="button" class="obra-trigger" data-open-obra="' + idx + '" aria-label="Ver en grande: ' + escapeHtml(alt) + '">'
+              + '<span class="lienzo" style="--r:' + razon.toFixed(4) + '"><img src="' + escapeHtml(obra.thumb_url || obra.imagen_url) + '" alt="' + escapeHtml(alt) + '"' + dimsImg + atributosCarga + ' /></span>'
+              + '</button>';
+          }
+
+          html += '<article class="obra-card' + (esVideo ? ' obra-video' : '') + '" data-obra-idx="' + idx + '" data-obra-id="' + escapeHtml(obra.id) + '">'
+            + cuerpo
             + '<div class="obra-pie">'
             + '<div class="obra-meta">'
             + '<span class="' + primaryClass + '">' + escapeHtml(primaryLabel) + '</span>'
@@ -238,6 +415,7 @@
     });
 
     els.salasMain.innerHTML = html;
+    prepararVideos();
   }
 
   function renderMensajes() {
@@ -322,6 +500,7 @@
     var sala = state.salas.find(function (s) { return s.id === Number(obra.sala_id); }) || { grado: obra.sala_id + '°' };
 
     els.visor.setAttribute('data-sala-visor', String(obra.sala_id)); // la pared del visor toma el color del grado
+    liberarVideoVisor();
     els.vLienzo.classList.remove('zoom');
     els.vZoomTxt.textContent = 'Acercar';
     els.vImg.removeAttribute('data-hd');
@@ -357,6 +536,24 @@
       els.vDesc.hidden = true;
     }
 
+    // Obra de tipo video: el póster ya está en vImg; se superpone el video (muted, sin volumen) con controles propios
+    els.vZoom.hidden = false;
+    if (obra.tipo === 'video' && obra.video_url) {
+      els.vZoom.hidden = true;
+      els.vLienzo.classList.add('es-video');
+      els.vVideo.hidden = false;
+      els.vVideoCtl.hidden = false;
+      els.vVideo.muted = true;
+      els.vVideo.poster = obra.thumb_url || obra.imagen_url;
+      els.vVideo.setAttribute('src', obra.video_url);
+      actualizarControlesVideo();
+      // Con movimiento reducido espera el toque en reproducir; si no, arranca solo (muted)
+      if (!reducirMovimiento()) {
+        var pv = els.vVideo.play();
+        if (pv && pv.catch) pv.catch(function () { actualizarControlesVideo(); });
+      }
+    }
+
     var liked = global.ExpoStore.isObraLiked(obra.id);
     els.vLike.setAttribute('aria-pressed', liked ? 'true' : 'false');
     els.vLikeTxt.textContent = 'Me gusta (' + (Number(obra.likes_count) || 0) + ')';
@@ -369,7 +566,40 @@
     els.vWhatsapp.href = 'https://wa.me/?text=' + encodeURIComponent(shareText);
   }
 
+  /** Pausa y libera el video del visor (al cerrar, al pasar a otra obra o al mostrar una foto) */
+  function liberarVideoVisor() {
+    var v = els.vVideo;
+    if (!v) return;
+    v.pause();
+    if (v.getAttribute('src')) {
+      v.removeAttribute('src');
+      try { v.load(); } catch (_) { /* nada */ }
+    }
+    v.hidden = true;
+    els.vVideoCtl.hidden = true;
+    els.vLienzo.classList.remove('es-video');
+    els.vProg.value = 0;
+  }
+  function actualizarControlesVideo() {
+    var v = els.vVideo;
+    var jugando = v && !v.paused && !v.ended;
+    els.vPlay.innerHTML = jugando ? iconoPausa() : iconoPlay();
+    els.vPlay.setAttribute('aria-label', jugando ? 'Pausar la animación' : 'Reproducir la animación');
+    if (v && v.duration > 0) els.vProg.value = Math.round(v.currentTime / v.duration * 1000);
+  }
+  function alternarVideoVisor() {
+    var v = els.vVideo;
+    if (!v || !v.getAttribute('src')) return;
+    if (v.paused) {
+      var p = v.play();
+      if (p && p.catch) p.catch(function () { actualizarControlesVideo(); });
+    } else {
+      v.pause();
+    }
+  }
+
   function openVisor(idx) {
+    pausarTodosEnGrilla();
     showObraInVisor(idx);
     els.visor.classList.add('abierto');
     document.body.style.overflow = 'hidden';
@@ -379,6 +609,8 @@
   function closeVisor() {
     els.visor.classList.remove('abierto');
     document.body.style.overflow = '';
+    liberarVideoVisor();
+    ajustarVideos();
   }
 
   function stepVisor(delta) {
@@ -396,7 +628,10 @@
     var fileBase = 'obra-' + obra.sala_id + '-grado' + (slug ? '-' + normalizeText(slug).replace(/[^a-z0-9]+/g, '-') : '');
 
     try {
-      if (obra.imagen_url.indexOf('data:image/svg+xml') === 0) {
+      if (obra.tipo === 'video' && obra.video_url) {
+        var respV = await fetch(obra.video_url);
+        triggerBlobDownload(await respV.blob(), fileBase + '-animacion.mp4');
+      } else if (obra.imagen_url.indexOf('data:image/svg+xml') === 0) {
         var img = new Image();
         await new Promise(function (resolve, reject) {
           img.onload = resolve;
@@ -418,7 +653,7 @@
         var ext = blob.type === 'image/webp' ? '.webp' : (blob.type === 'image/png' ? '.png' : '.jpg');
         triggerBlobDownload(blob, fileBase + ext);
       }
-      showToast('Descargando la foto de la obra…');
+      showToast(obra.tipo === 'video' ? 'Descargando la animación…' : 'Descargando la foto de la obra…');
     } catch (_) {
       global.open(obra.imagen_url, '_blank', 'noopener');
     }
@@ -479,8 +714,20 @@
       els.vZoomTxt.textContent = z ? 'Alejar' : 'Acercar';
     });
     els.vLienzo.addEventListener('click', function () {
+      if (els.vLienzo.classList.contains('es-video')) { alternarVideoVisor(); return; }
       var z = els.vLienzo.classList.toggle('zoom');
       els.vZoomTxt.textContent = z ? 'Alejar' : 'Acercar';
+    });
+    els.vPlay.addEventListener('click', alternarVideoVisor);
+    ['play', 'pause', 'ended', 'timeupdate', 'loadedmetadata'].forEach(function (ev) {
+      els.vVideo.addEventListener(ev, actualizarControlesVideo);
+    });
+    els.vProg.addEventListener('input', function () {
+      var v = els.vVideo;
+      if (v && v.duration > 0) v.currentTime = v.duration * (Number(els.vProg.value) / 1000);
+    });
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) { pausarTodosEnGrilla(); if (els.vVideo && !els.vVideo.paused) els.vVideo.pause(); } else { ajustarVideos(); }
     });
     els.visor.addEventListener('click', function (e) {
       if (e.target === els.visor) closeVisor();
@@ -495,7 +742,7 @@
     var touchX = null;
     var touchY = null;
     els.visor.addEventListener('touchstart', function (e) {
-      if (e.touches.length !== 1) { touchX = null; return; }
+      if (e.touches.length !== 1 || (e.target.closest && e.target.closest('.video-ctl'))) { touchX = null; return; }
       touchX = e.touches[0].clientX;
       touchY = e.touches[0].clientY;
     }, { passive: true });
@@ -624,10 +871,13 @@
 
     try {
       // Las fotos salen de obras.json: se dibuja la grilla apenas se lee, sin esperar a Supabase.
+      var escucha = escucharObrasJson();
       var res = await global.ExpoStore.fetchObras();
+      escucha.soltar();
       state.salas = global.ExpoStore.getSalasIniciales();
       state.obras = res.data;
       state.mode = res.mode;
+      aplicarDatosDeVideos(await Promise.race([escucha.promesa, new Promise(function (r) { global.setTimeout(function () { r({}); }, 400); })]));
 
       els.demoStrip.hidden = state.mode === 'live';
       updateQrArrivalBanner();

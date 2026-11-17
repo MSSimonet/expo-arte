@@ -163,6 +163,11 @@
       <div class="visor-stage">
         <div class="visor-lienzo" id="vLienzo">
           <img id="vImg" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'/%3E" alt="Obra ampliada" />
+          <video id="vVideo" muted loop playsinline preload="none" disablepictureinpicture disableremoteplayback controlslist="nodownload noplaybackrate" hidden aria-label="Animación"></video>
+        </div>
+        <div class="video-ctl" id="vVideoCtl" hidden>
+          <button type="button" class="vc-play" id="vPlay" aria-label="Reproducir la animación"></button>
+          <input type="range" id="vProg" min="0" max="1000" value="0" step="1" aria-label="Progreso de la animación" />
         </div>
         <button type="button" class="visor-nav prev" id="vPrev" aria-label="Obra anterior">‹</button>
         <button type="button" class="visor-nav next" id="vNext" aria-label="Obra siguiente">›</button>

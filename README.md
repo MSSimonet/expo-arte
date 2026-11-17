@@ -4,7 +4,7 @@ Aplicación web para la exposición de arte de la **Escuela N° 5 D.E. 13 “Rob
 
 - **Muestra pública (`index.html`):** las familias escanean el código QR del grado con la cámara de su celular y acceden directo sin instalar ninguna app ni crear cuenta.
 - **Entrada por QR por grado (`?sala=1` a `?sala=7`):** si escanean el QR de `3° grado`, ven primero esa sala con un cartel de bienvenida, pero conservan la barra superior para recorrer libremente todos los grados (`1°` a `7°`), dar **Me gusta**, ampliar/descargar/compartir por WhatsApp y dejar mensajes en el **Libro de visitas**.
-- **Las fotos salen de la carpeta `Obras/`:** `Obras/1` es 1° grado, `Obras/2` es 2° grado, y así hasta `Obras/7`. Un script las optimiza y arma el sitio (ver **Cómo agregar fotos**).
+- **Las fotos (y los videos) salen de la carpeta `Obras/`:** `Obras/1` es 1° grado, `Obras/2` es 2° grado, y así hasta `Obras/7`. Un script las optimiza y arma el sitio (ver **Cómo agregar fotos**).
 - **Panel docente privado (`admin.html`):** para editar los textos de cada sala y moderar los mensajes del libro de visitas.
 - **Carteles QR listos para imprimir (`qr-imprimir.html`):** genera los 7 carteles A4 por grado (más un cartel general opcional) para imprimir o guardar en PDF.
 
@@ -33,6 +33,32 @@ Cosas para saber:
 - Para **sacar** una foto, borrala de `Obras/N` y corré `npm run obras` otra vez: el script también limpia sus versiones generadas.
 - Cada foto se identifica por su ruta (por ejemplo `3/foto.jpeg`). Si **renombrás o movés** una foto, es una foto nueva y su contador de **Me gusta** empieza de cero.
 - Si una carpeta no existe o está vacía, esa sala muestra "Todavía no se cargaron obras".
+
+---
+
+## Cómo agregar videos (animaciones)
+
+Los videos son archivos `.mp4` y se cargan igual que las fotos: se copian a la carpeta del grado (`Obras/5`, por ejemplo) y se corre `npm run obras`. Se muestran **sin sonido**, **al principio de la sala** y con un **marco de proyección** (bisel grafito con perforaciones de cinta de película, el botón de reproducir y la pastilla *Animación*).
+
+**Requisito:** [ffmpeg](https://ffmpeg.org/download.html) instalado en la computadora (en Windows: `winget install Gyan.FFmpeg`; o `npm install --save-dev ffmpeg-static`). Sin ffmpeg el script avisa y omite los videos; las fotos se procesan igual.
+
+**Qué hace el script con cada `.mp4`** (`assets/obras/N/`):
+- Lo recodifica a H.264, **sin pista de audio**, de 480 px de ancho, con *faststart*, apuntando a unos 700 KB (tope de 1,2 MB). Un video de 5 MB queda en ~0,6 MB.
+- Saca un cuadro del propio video para el **póster** (`<id>.webp`) y la **miniatura** (`<id>-t.webp`).
+- En `obras.json` lo anota con `tipo: "video"` y los campos `video`, `imagen` (póster) y `miniatura`; los videos van **primero** dentro del grado.
+- **Ignora la imagen fija** que tenga un video con el mismo nombre base (sin contar un final `_enmarcado` / `_enmarcada`): el póster sale del video.
+- Es incremental: el video que no cambió no se vuelve a procesar.
+
+**En la muestra:** los videos se reproducen solos (mudos, en bucle) solo cuando están a la vista y después de que cargaron las primeras fotos, y **máximo 2 a la vez**. Con movimiento reducido, ahorro de datos o conexión 2g **no** se reproducen solos: se ve el póster y se tocan para reproducir. En el visor llevan botón de reproducir/pausa y barra de progreso, sin volumen.
+
+### Importante: los videos de `Obras/5` y los que hoy están publicados
+
+Los `.mp4` que hay en `Obras/5` (`…_enmarcado.mp4`) traen el **marco de madera dibujado adentro**; el sitio les pone su propio marco de proyección, así que no sirven. Los videos que hoy están publicados se generaron a partir de los **originales sin marco** (`D:\Marcelo\Desktop\EXPO\5`, `WhatsApp Video … .mp4`), usando una copia temporal de `Obras/` donde esos mp4 reemplazan a los de `Obras/5`.
+
+Cada video se identifica por su **ruta** (como las fotos): si el nombre cambia, es un video nuevo y su contador de *Me gusta* empieza de cero. Por eso:
+
+- **Si volvés a correr `npm run obras` sin cambiar nada en `Obras/5`**, el script procesa los `_enmarcado.mp4` (con marco), les crea **ids nuevos** y **borra** los videos publicados. No lo hagas sin antes tener los originales en `Obras/5`.
+- **Para repetir el proceso sin romper lo generado**, hacelo desde una copia: copiá `Obras/` a una carpeta temporal, reemplazá en `Obras/5` los `_enmarcado.mp4` por los originales sin marco y corré `npm run obras -- --entrada <la carpeta temporal>`. Mientras los originales conserven su nombre (`WhatsApp Video … .mp4`), los ids no cambian.
 
 ---
 

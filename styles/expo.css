@@ -1027,6 +1027,114 @@ footer {
   background: rgba(255, 255, 255, 0.1);
 }
 
+/* ---------- Obras de tipo video: marco de proyección ---------- */
+/* Bisel grafito con perforaciones de cinta de película a los lados (solo CSS); la pantalla respeta la proporción real del video */
+.video-caja {
+  position: relative;
+  z-index: 1;
+  transition: transform var(--dur) var(--ease-out);
+}
+@media (hover: hover) {
+  .obra-video:hover .obra-trigger { transform: none; }
+  .obra-video:hover .video-caja { transform: translateY(-4px); }
+}
+.obra-trigger .marco-video {
+  --perf: 15px;
+  display: grid;
+  grid-template-columns: var(--perf) minmax(0, 1fr) var(--perf);
+  align-items: stretch;
+  aspect-ratio: auto;
+  padding: 7px 0;
+  border-radius: 6px;
+  background: linear-gradient(150deg, #3b4048, #1e2126 45%, #14171b);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.13),
+    0 1px 2px rgba(60, 40, 20, 0.34),
+    0 9px 14px -4px rgba(60, 40, 20, 0.3),
+    0 20px 28px -12px rgba(60, 40, 20, 0.26);
+}
+.marco-video .perf {
+  background: radial-gradient(ellipse 34% 30% at 50% 50%, #ece6d6 0 94%, transparent 100%) 0 0 / 100% 20px repeat-y;
+}
+.marco-video .pantalla {
+  position: relative;
+  display: block;
+  aspect-ratio: var(--r, 0.5621);
+  background: #0b0d10;
+  border-radius: 2px;
+  overflow: hidden;
+  box-shadow: 0 0 0 2px #0b0d10, 0 0 0 3px rgba(255, 255, 255, 0.1);
+}
+.marco-video .pantalla img,
+.marco-video .pantalla video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+.marco-video .pantalla video {
+  opacity: 0;
+  transition: opacity var(--dur) ease;
+  pointer-events: none;
+}
+.obra-video.reproduciendo .pantalla video { opacity: 1; }
+.video-pastilla {
+  position: absolute;
+  left: 6px;
+  top: 6px;
+  z-index: 2;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  background: rgba(18, 20, 24, 0.84);
+  color: #f4efe2;
+  font-family: var(--font-body);
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+/* Botón de reproducir: 44 px de área táctil; el disco oscuro visible es el ::before */
+.video-play {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 3;
+  width: var(--tap);
+  height: var(--tap);
+  margin: calc(var(--tap) / -2) 0 0 calc(var(--tap) / -2);
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  isolation: isolate;
+  transition: opacity var(--dur) ease, visibility 0s, transform var(--dur-fast) var(--ease-out);
+}
+.video-play::before {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  z-index: -1;
+  border-radius: 50%;
+  background: rgba(18, 20, 24, 0.8);
+  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.85), 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+.video-play svg { width: 20px; height: 20px; margin-left: 2px; }
+.video-play:active { transform: scale(0.92); }
+.video-play:focus-visible { outline: none; box-shadow: 0 0 0 3px #ffffff, 0 0 0 6px #17232d; }
+.obra-video.reproduciendo .video-play {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity var(--dur) ease, visibility 0s var(--dur);
+}
+
 /* ---------- Visor / Lightbox ---------- */
 .visor {
   position: fixed;
@@ -1114,6 +1222,56 @@ footer {
   max-height: none;
   cursor: zoom-out;
 }
+/* Visor: video (muted, sin volumen) sobre el póster, con controles propios de reproducir/pausa y progreso */
+.visor-lienzo.es-video { position: relative; }
+.visor-lienzo.es-video img { cursor: pointer; }
+#vVideo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: transparent;
+  cursor: pointer;
+}
+#vVideo[hidden] { display: none; }
+.video-ctl {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 10px auto 0;
+  padding: 0 14px 0 4px;
+  max-width: 420px;
+  border-radius: var(--radius-pill);
+  background: rgba(251, 246, 234, 0.96);
+  box-shadow: 0 1px 3px rgba(60, 40, 20, 0.28);
+}
+.video-ctl[hidden] { display: none; }
+.vc-play {
+  flex: 0 0 auto;
+  width: var(--tap);
+  height: var(--tap);
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #17232d;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.vc-play svg { width: 22px; height: 22px; }
+.vc-play:focus-visible,
+#vProg:focus-visible { outline: 3px solid #17232d; outline-offset: 2px; }
+#vProg {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: var(--tap);
+  margin: 0;
+  accent-color: #17232d;
+  cursor: pointer;
+}
+
 .visor-datos {
   text-align: center;
   margin-top: var(--sp-4);
