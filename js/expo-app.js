@@ -238,8 +238,8 @@
       var isHighlighted = state.qrSalaId === sala.id;
 
       html += '<section class="sala sala-' + sala.id + (isHighlighted ? ' destacada' : '') + '" id="sala-' + sala.id + '" aria-label="Sala de ' + escapeHtml(sala.grado) + ' grado">';
-      var bannerUrl = 'assets/banners/banner-sala-' + sala.id + '.webp';
-      var bannerSmUrl = 'assets/banners/banner-sala-' + sala.id + '-sm.webp';
+      var bannerUrl = 'assets/banners/banner-sala-' + sala.id + '.webp?v=2';
+      var bannerSmUrl = 'assets/banners/banner-sala-' + sala.id + '-sm.webp?v=2';
       var desc = sala.desc_a || sala.desc_b || '';
       var altBanner = sala.grado + ' grado — ' + (desc || sala.nombre);
 
