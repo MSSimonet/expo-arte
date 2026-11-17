@@ -144,6 +144,15 @@
     els.qrArrival.hidden = false;
   }
 
+  /** Marca con una clase si la barra de salas tiene más salas hacia un costado (el CSS desvanece ese borde) */
+  function pistasDeLaBarra() {
+    var c = els.chipsSalas;
+    if (!c) return;
+    var max = c.scrollWidth - c.clientWidth;
+    c.classList.toggle('hay-mas-izq', max > 2 && c.scrollLeft > 2);
+    c.classList.toggle('hay-mas-der', max > 2 && c.scrollLeft < max - 2);
+  }
+
   function renderNavAndSelects() {
     var chipsHtml = '';
     if (state.qrSalaId) {
@@ -155,6 +164,7 @@
     });
     chipsHtml += '<a class="chip c-msg" href="#mensajes">Mensajes' + (state.mensajesCargados ? ' (' + state.mensajes.length + ')' : '') + '</a>';
     els.chipsSalas.innerHTML = chipsHtml;
+    pistasDeLaBarra();
 
     var activeChip = els.chipsSalas.querySelector('.chip.activa');
     if (activeChip) {
@@ -241,15 +251,19 @@
       var bannerUrl = 'assets/banners/banner-sala-' + sala.id + '.webp?v=2';
       var bannerSmUrl = 'assets/banners/banner-sala-' + sala.id + '-sm.webp?v=2';
       var desc = sala.desc_a || sala.desc_b || '';
-      var altBanner = sala.grado + ' grado — ' + (desc || sala.nombre);
 
+      // El banner es solo decorativo (alt vacío): el nombre del grado y la frase son texto real en .sala-franja,
+      // que se ve debajo del banner en pantallas angostas y queda solo para lectores de pantalla desde 640 px.
       html += '<div class="sala-cabecera-banner">'
-        + '<h2 class="sr-only">' + escapeHtml(sala.grado) + ' grado — ' + escapeHtml(sala.nombre) + '</h2>'
         + '<picture>'
         + '<source srcset="' + bannerSmUrl + '" media="(max-width: 600px)" type="image/webp" />'
         + '<source srcset="' + bannerUrl + '" type="image/webp" />'
-        + '<img class="sala-banner-img" src="' + bannerUrl + '" alt="' + escapeHtml(altBanner) + '" width="2048" height="508" loading="lazy" decoding="async" />'
+        + '<img class="sala-banner-img" src="' + bannerUrl + '" alt="" width="2048" height="508" loading="lazy" decoding="async" />'
         + '</picture>'
+        + '<div class="sala-franja">'
+        + '<h2 class="sala-franja-grado">' + escapeHtml(sala.nombre) + '</h2>'
+        + (desc ? '<p class="sala-franja-frase">' + escapeHtml(desc) + '</p>' : '')
+        + '</div>'
         + '<div class="sala-subbar"><span class="pastilla">' + escapeHtml(sala.nombre) + ' · ' + obrasSala.length + (obrasSala.length === 1 ? ' obra' : ' obras') + '</span></div>'
         + '</div>';
 
@@ -572,6 +586,9 @@
     }
 
     els.btnVerTodas.addEventListener('click', clearQrFocus);
+    els.chipsSalas.addEventListener('scroll', pistasDeLaBarra, { passive: true });
+    global.addEventListener('resize', pistasDeLaBarra);
+    global.addEventListener('load', pistasDeLaBarra);
     els.chipsSalas.addEventListener('click', function (e) {
       if (e.target.closest('[data-reset-qr]')) {
         clearQrFocus();
@@ -682,13 +699,11 @@
       var seccion = document.getElementById('sala-' + sala.id);
       if (!seccion) return;
       var texto = sala.desc_a || sala.desc_b || '';
-      var img = seccion.querySelector('.sala-banner-img');
-      if (img && texto) {
-        img.alt = sala.grado + ' grado — ' + texto;
-      }
-      var cabecera = seccion.querySelector('.sala-cabecera');
-      if (!cabecera) return;
-      var p = cabecera.querySelector('.sala-desc');
+      var franja = seccion.querySelector('.sala-franja');
+      if (!franja) return;
+      var h = franja.querySelector('.sala-franja-grado');
+      if (h && sala.nombre && h.textContent !== sala.nombre) h.textContent = sala.nombre;
+      var p = franja.querySelector('.sala-franja-frase');
       if (!texto) {
         if (p) p.remove();
         return;
@@ -697,9 +712,9 @@
         if (p.textContent !== texto) p.textContent = texto;
       } else {
         p = document.createElement('p');
-        p.className = 'sala-desc';
+        p.className = 'sala-franja-frase';
         p.textContent = texto;
-        cabecera.appendChild(p);
+        franja.appendChild(p);
       }
     });
   }

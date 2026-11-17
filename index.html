@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Cinzel:wght@600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles/base.css?v=2" />
-  <link rel="stylesheet" href="styles/expo.css?v=7" />
+  <link rel="stylesheet" href="styles/expo.css?v=8" />
 </head>
 <body>
 
@@ -28,30 +28,20 @@
 
   <!-- ================= PORTADA ================= -->
   <header class="hero" id="inicio">
-    <div class="hero-formas" aria-hidden="true">
-      <span class="forma f1"><svg viewBox="0 0 40 40"><path d="M20 2l5.3 11.5L38 15l-9.4 8.6L31.2 37 20 30.6 8.8 37l2.6-13.4L2 15l12.7-1.5z" fill="#ffc21f"/></svg></span>
-      <span class="forma f2"><svg viewBox="0 0 60 60"><path d="M31 4c11 0 24 7 25 20s-6 27-21 30S5 47 4 33 18 4 31 4z" fill="#ff8fb8" opacity=".85"/></svg></span>
-      <span class="forma f3"><svg viewBox="0 0 90 30"><path d="M4 20C14 8 30 4 46 8s28 10 40 2c-6 12-22 18-38 15S16 14 4 20z" fill="#ff6b5e" opacity=".9"/></svg></span>
-      <span class="forma f4"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="14" fill="none" stroke="#ffffff" stroke-width="5" opacity=".55"/></svg></span>
-      <span class="forma f5"><svg viewBox="0 0 30 30"><path d="M15 1l3.2 10.8L29 15l-10.8 3.2L15 29l-3.2-10.8L1 15l10.8-3.2z" fill="#ffffff" opacity=".8"/></svg></span>
-      <span class="forma f6"><svg viewBox="0 0 60 24"><path d="M3 18l9-12 9 12 9-12 9 12 9-12 9 12" fill="none" stroke="#8ee3ec" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-    </div>
     <div class="hero-inner">
       <div class="hero-banner-wrap">
         <h1 class="sr-only">Exposición de Arte — Muestra Anual · Escuela N° 5 D.E. 13 “Roberto Billinghurst” · Pequeños grandes artistas</h1>
-        <picture>
-          <source srcset="assets/banner-hero-sm.webp" media="(max-width: 600px)" type="image/webp" />
-          <source srcset="assets/banner-hero.webp" type="image/webp" />
-          <img
-            class="hero-banner-img"
-            src="assets/banner-hero.webp"
-            alt="Exposición de Arte — Muestra Anual · Escuela N° 5 D.E. 13 “Roberto Billinghurst”"
-            width="2048"
-            height="582"
-            fetchpriority="high"
-            decoding="async"
-          />
-        </picture>
+        <img
+          class="hero-banner-img"
+          src="assets/banner-hero-1600.webp"
+          srcset="assets/banner-hero-800.webp 800w, assets/banner-hero-1600.webp 1600w"
+          sizes="(max-width: 599px) 670px, 100vw"
+          alt="Exposición de Arte — Muestra Anual · Escuela N° 5 D.E. 13 “Roberto Billinghurst”"
+          width="1600"
+          height="455"
+          fetchpriority="high"
+          decoding="async"
+        />
       </div>
     </div>
   </header>

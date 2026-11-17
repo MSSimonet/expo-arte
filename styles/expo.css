@@ -54,71 +54,49 @@
 }
 
 /* ---------- Hero / Portada ---------- */
+/* El banner ocupa todo el encabezado: de borde a borde de la pantalla, pegado arriba y hasta la barra de salas.
+   Sin fondo de color, formas flotantes, márgenes ni bordes redondeados. */
 .hero {
-  --focus-ring: var(--sun);
   position: relative;
-  overflow: hidden;
-  background: var(--hero-accent);
-  background-image:
-    radial-gradient(circle at 12% 18%, rgba(255, 255, 255, 0.16) 0 2px, transparent 2.5px),
-    radial-gradient(circle at 86% 24%, rgba(255, 224, 102, 0.28) 0 3px, transparent 3.5px),
-    radial-gradient(circle at 72% 78%, rgba(255, 255, 255, 0.14) 0 2.5px, transparent 3px),
-    linear-gradient(175deg, rgba(0, 0, 0, 0.14) 0%, rgba(0, 0, 0, 0) 62%);
-  background-size: 180px 180px, 240px 240px, 200px 200px, 100% 100%;
-  padding: var(--sp-5) var(--gutter) var(--sp-5);
+  padding: 0;
   text-align: center;
-  transition: background-color var(--dur-slow) ease;
-}
-.hero.compacto {
-  padding-top: var(--sp-3);
-  padding-bottom: var(--sp-3);
-}
-.hero.compacto .hero-sub {
-  display: none;
-}
-.hero.compacto .hero-banner-wrap {
-  width: min(100%, 560px);
-}
-@media (min-width: 760px) {
-  .hero {
-    padding: var(--sp-8) var(--sp-6);
-  }
-  .hero.compacto {
-    padding: var(--sp-4) var(--sp-6);
-  }
+  line-height: 0;
 }
 .hero-inner {
   position: relative;
-  z-index: 1;
-  max-width: 980px;
-  margin: 0 auto;
+  max-width: none;
+  margin: 0;
 }
 .hero-banner-wrap {
   position: relative;
   display: block;
-  width: min(100%, 940px);
-  margin: 0 auto;
-  border-radius: var(--radius-lg);
+  width: 100%;
+  margin: 0;
+  border-radius: 0;
   overflow: hidden;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45), 0 4px 14px rgba(0, 0, 0, 0.25);
-  border: 1.5px solid rgba(255, 255, 255, 0.35);
-  background: #181410;
+  background: #181410; /* mismo tono oscuro del banner: se ve mientras carga */
   line-height: 0;
-  transition: transform var(--dur) var(--ease-out), box-shadow var(--dur) ease;
-}
-@media (hover: hover) {
-  .hero-banner-wrap:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.5), 0 6px 18px rgba(0, 0, 0, 0.3);
-  }
 }
 .hero-banner-img {
-  width: 100%;
-  height: auto;
-  aspect-ratio: 1024 / 291;
   display: block;
+  width: 100%;
+  /* Pantallas angostas: gana altura y recorta un poco los costados (el escudo y el título están en el centro) */
+  height: clamp(150px, 50vw, 190px);
   object-fit: cover;
+  object-position: 50% 50%;
 }
+@media (min-width: 600px) {
+  .hero-banner-img {
+    height: auto;
+    aspect-ratio: 1600 / 455;
+  }
+}
+/* Llegada por QR en celulares: el banner un poco más bajo para que entren la cabecera de la sala y las primeras obras */
+@media (max-width: 599px) {
+  .hero.compacto .hero-banner-img { height: 150px; }
+}
+/* Sin llegada por QR el banner queda pegado a la barra de salas; con el cartel del QR se mantiene su separación */
+.qr-arrival[hidden] + .barra { margin-top: 0; }
 
 .hero-meta {
   margin: var(--sp-3) auto 0;
@@ -228,7 +206,7 @@
 .qr-arrival-copy span {
   display: block;
   margin-top: 0.15rem;
-  font-size: 0.92rem;
+  font-size: 1rem;
   line-height: 1.45;
   color: var(--ink-soft);
 }
@@ -253,10 +231,6 @@
    Así la cabecera de la sala (y, en pantallas más altas, las primeras fotos) entran en la primera pantalla.
    La portada completa sigue igual cuando no se llega por QR. */
 @media (max-width: 480px) {
-  .hero.compacto {
-    padding-top: var(--sp-3);
-    padding-bottom: var(--sp-3);
-  }
   .hero.compacto .hero-meta { margin-top: var(--sp-2); }
   .hero.compacto .hero-school { font-size: 0.98rem; }
   .hero.compacto .hero-badges { margin-top: var(--sp-2); }
@@ -275,11 +249,20 @@
   z-index: 40;
   background: var(--bar-bg);
   border-bottom: 1px solid var(--line);
-  padding: var(--sp-2) var(--sp-3) 0;
+  padding: var(--sp-2) max(var(--sp-3), env(safe-area-inset-right)) 0 max(var(--sp-3), env(safe-area-inset-left));
   margin-top: var(--sp-4);
 }
 body[data-sala] .barra {
   border-bottom: 3px solid var(--sala);
+}
+/* Al enfocar un campo del formulario, el navegador lo deja debajo de la barra pegajosa: se le reserva su alto */
+.campo input,
+.campo select,
+.campo textarea,
+#msgSubmit { scroll-margin-top: 6rem; scroll-margin-bottom: 1rem; }
+/* Celular en horizontal: la barra no queda pegada arriba (ocuparía casi media pantalla y taparía el contenido y el formulario) */
+@media (max-height: 499px) {
+  .barra { position: static; }
 }
 .barra-inner {
   max-width: 1120px;
@@ -300,6 +283,10 @@ body[data-sala] .barra {
   justify-content: safe center; /* centrados; si no caben, se desplazan desde el primero */
 }
 .chips::-webkit-scrollbar { display: none; }
+/* Se nota que hay más salas hacia el costado: el borde se desvanece donde sigue la barra (clases que pone el JS) */
+.chips.hay-mas-der { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 34px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 34px), transparent); }
+.chips.hay-mas-izq { -webkit-mask-image: linear-gradient(to left, #000 calc(100% - 34px), transparent); mask-image: linear-gradient(to left, #000 calc(100% - 34px), transparent); }
+.chips.hay-mas-der.hay-mas-izq { -webkit-mask-image: linear-gradient(to right, transparent, #000 34px, #000 calc(100% - 34px), transparent); mask-image: linear-gradient(to right, transparent, #000 34px, #000 calc(100% - 34px), transparent); }
 @media (min-width: 860px) {
   .chips {
     flex-wrap: wrap;
@@ -412,6 +399,51 @@ main {
   aspect-ratio: 4128 / 1024;
   display: block;
   object-fit: cover;
+}
+/* Nombre del grado y frase épica como texto real. Desde 640 px solo los lee el lector de pantalla (el banner ya los trae
+   dibujados); en pantallas angostas el dibujo queda chico y se muestran en una franja con el color del grado. */
+.sala-franja {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+@media (max-width: 639px) {
+  .sala-franja {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+    padding: 14px max(18px, env(safe-area-inset-right)) 18px max(18px, env(safe-area-inset-left));
+    background: var(--sala);   /* --sala-N del grado: texto blanco con contraste AA (≥ 5,7:1) */
+    color: var(--sala-on);
+    text-align: center;
+    line-height: 1.5;
+  }
+  .sala-franja-grado {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: max(20px, 1.25rem);
+    line-height: 1.25;
+  }
+  .sala-franja-frase {
+    margin: 0.5rem auto 0;
+    max-width: 36rem;
+    font-family: "trajan-pro-3", "Trajan Pro 3", "Trajan Pro", "Cinzel", Georgia, serif;
+    font-weight: 600;
+    font-size: max(17px, 1.0625rem);
+    line-height: 1.55;
+    letter-spacing: 0.01em;
+    text-wrap: pretty;
+  }
 }
 
 .sala-cabecera {
@@ -755,7 +787,7 @@ main {
   gap: 0.3rem;
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 0.86rem;
+  font-size: 0.9rem; /* contador de Me gusta: al menos 14 px */
   font-variant-numeric: tabular-nums;
   cursor: pointer;
   flex: 0 0 auto;
@@ -874,7 +906,7 @@ main {
 .campo-meta {
   display: flex;
   justify-content: space-between;
-  font-size: var(--fs-xs);
+  font-size: 0.875rem; /* 14 px */
   color: var(--ink-mute);
   margin-top: var(--sp-1);
   font-variant-numeric: tabular-nums;
@@ -996,7 +1028,7 @@ footer {
 }
 .pie-escuela {
   margin: var(--sp-5) 0 0;
-  font-size: 0.92rem;
+  font-size: 1rem;
   color: #d3ebdc;
   font-weight: 700;
 }
@@ -1140,7 +1172,7 @@ footer {
   max-height: 100dvh;
   overflow: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 12px 12px calc(18px + env(safe-area-inset-bottom));
+  padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) calc(18px + env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
   position: relative;
   display: flex;
   flex-direction: column;
@@ -1175,12 +1207,14 @@ footer {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 220px;
-  max-height: 60dvh;
+  min-height: 180px;
+  /* el alto de la obra deja lugar a los datos y a los botones de abajo (celulares bajos) */
+  max-height: min(60dvh, max(180px, calc(100dvh - 330px)));
 }
+.visor-lienzo.es-video { max-height: min(60dvh, max(180px, calc(100dvh - 390px))); }
 .visor-lienzo img {
   width: 100%;
-  max-height: 60dvh;
+  max-height: inherit;
   object-fit: contain;
   display: block;
   transition: transform var(--dur) ease;
@@ -1210,7 +1244,7 @@ footer {
 .video-ctl {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   margin: 10px auto 0;
   padding: 0 14px 0 4px;
   max-width: 420px;
@@ -1265,7 +1299,7 @@ footer {
 .v-donde {
   color: #3a4753;
   font-weight: 700;
-  font-size: 0.92rem;
+  font-size: 1rem;
   margin-top: 0.22rem;
 }
 .v-desc {
@@ -1337,11 +1371,11 @@ footer {
   z-index: 3;
 }
 .visor-nav:active { transform: translateY(-50%) scale(0.92); }
-.visor-nav.prev { left: 0.5rem; }
-.visor-nav.next { right: 0.5rem; }
+.visor-nav.prev { left: max(0.5rem, env(safe-area-inset-left)); }
+.visor-nav.next { right: max(0.5rem, env(safe-area-inset-right)); }
 .visor-cerrar {
-  top: 0.65rem;
-  right: 0.65rem;
+  top: max(0.65rem, env(safe-area-inset-top));
+  right: max(0.65rem, env(safe-area-inset-right));
   z-index: 4;
   font-size: 1.2rem;
 }
@@ -1380,72 +1414,6 @@ footer {
 .paper-title h1 .l2 { animation-delay: 260ms; }
 .hero-meta { animation: linea-entra 520ms var(--ease-out) 320ms both; }
 .hero-badges { animation: linea-entra 520ms var(--ease-out) 400ms both; }
-
-/* ---------- Portada: formas de color que flotan ---------- */
-.hero-formas {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  overflow: hidden;
-}
-.forma {
-  position: absolute;
-  display: block;
-  width: var(--s, 32px);
-  height: var(--s, 32px);
-}
-.forma svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-.f1 { --s: 30px; top: 5%; left: 3%; --dx: 6px; --dy: -9px; --r: 18deg; --t: 7s; }
-.f2 { --s: 46px; top: -8px; right: -10px; --dx: -8px; --dy: 7px; --r: -10deg; --t: 9s; }
-.f3 { --s: 70px; height: 24px; bottom: 2%; left: -14px; --dx: 10px; --dy: -4px; --r: 4deg; --t: 8s; }
-.f4 { --s: 26px; top: 61%; right: 1%; --dx: -5px; --dy: -10px; --r: 0deg; --t: 6.5s; }
-.f5 { --s: 20px; bottom: 9%; right: 9%; --dx: 4px; --dy: -7px; --r: 45deg; --t: 5.5s; }
-.f6 { --s: 44px; height: 18px; top: 70%; left: -14px; --dx: 8px; --dy: 5px; --r: -6deg; --t: 10s; }
-@media (min-width: 760px) {
-  .f1 { --s: 44px; left: 8%; }
-  .f2 { --s: 70px; right: 6%; top: 6%; }
-  .f3 { --s: 110px; height: 36px; left: 6%; }
-  .f4 { --s: 40px; right: 12%; }
-  .f5 { --s: 28px; right: 18%; }
-  .f6 { --s: 64px; height: 26px; left: 12%; }
-}
-@keyframes flotar {
-  from { translate: 0 0; rotate: 0deg; }
-  to   { translate: var(--dx, 6px) var(--dy, -8px); rotate: var(--r, 8deg); }
-}
-/* El vaivén necesita el JS que lo pausa fuera de pantalla o con la pestaña oculta */
-.anim-js .forma {
-  animation: flotar var(--t, 8s) var(--ease-float) infinite alternate;
-}
-.anim-js .f2 { animation-delay: -2s; }
-.anim-js .f4 { animation-delay: -1s; }
-.anim-js .f6 { animation-delay: -3s; }
-.hero-formas.pausada .forma {
-  animation-play-state: paused;
-}
-
-/* ---------- Portada: leve movimiento con el scroll (CSS puro, donde se soporte) ---------- */
-@keyframes formas-parallax { to { translate: 0 -46px; } }
-@keyframes hero-parallax { to { translate: 0 26px; opacity: 0.82; } }
-@supports (animation-timeline: scroll()) {
-  @media (prefers-reduced-motion: no-preference) {
-    .hero-formas {
-      animation: formas-parallax linear both;
-      animation-timeline: scroll(root);
-      animation-range: 0 70vh;
-    }
-    .hero-inner {
-      animation: hero-parallax linear both;
-      animation-timeline: scroll(root);
-      animation-range: 0 70vh;
-    }
-  }
-}
 
 /* ---------- Barra de grados: píldora que se desliza + grado en pantalla ---------- */
 .anim-js .chips {
@@ -1671,7 +1639,6 @@ footer {
 
 /* ---------- Impresión: nada oculto ni decorativo ---------- */
 @media print {
-  .hero-formas,
   .chips-pildora,
   .anim-capa,
   .visor-clon {
