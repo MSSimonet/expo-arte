@@ -66,6 +66,15 @@
   --fs-md: 1.125rem;
   --fs-lg: 1.35rem;
   --fs-xl: clamp(1.5rem, 6vw, 2.1rem);
+  /* Escala fluida para celulares: crece con el ancho de la pantalla (de 320 a 430 px) y, al estar en rem, respeta la
+     letra del sistema. Pisos: 16 px el texto de lectura y 14 px el secundario.
+     Fórmula: mínimo + (máximo − mínimo) × (ancho − 320) / 110. */
+  --fs-sec: clamp(0.875rem, 0.693rem + 0.909vw, 0.9375rem);        /* secundario: 14 → 15 px */
+  --fs-ui: clamp(1rem, 0.818rem + 0.909vw, 1.0625rem);              /* botones y etiquetas: 16 → 17 px */
+  --fs-lectura: clamp(1rem, 0.636rem + 1.818vw, 1.125rem);          /* texto de lectura: 16 → 18 px */
+  --fs-frase: clamp(1.0625rem, 0.699rem + 1.818vw, 1.1875rem);      /* frase épica de cada sala: 17 → 19 px */
+  --fs-grado: clamp(1.25rem, 0.523rem + 3.636vw, 1.5rem);           /* nombre del grado: 20 → 24 px */
+  --fs-titulo: clamp(1.5rem, 0.409rem + 5.455vw, 1.875rem);         /* títulos de sección: 24 → 30 px */
   --lh-tight: 1.15;
   --lh-body: 1.55;
 
@@ -235,7 +244,7 @@ h1, h2, h3, .display {
 .btn {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 0.98rem;
+  font-size: var(--fs-ui);
   line-height: 1.2;
   border-radius: var(--radius-pill);
   padding: 0.6rem 1.2rem;
@@ -327,7 +336,7 @@ h1, h2, h3, .display {
   display: block;
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 0.94rem;
+  font-size: var(--fs-ui);
   margin-bottom: var(--sp-1);
   color: var(--ink);
 }
@@ -380,7 +389,7 @@ h1, h2, h3, .display {
   padding: 0.75rem 1.25rem;
   border-radius: var(--radius-pill);
   font-weight: 700;
-  font-size: 0.94rem;
+  font-size: var(--fs-ui);
   box-shadow: var(--shadow-lift);
   opacity: 0;
   pointer-events: none;
