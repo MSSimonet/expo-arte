@@ -401,6 +401,33 @@ main {
   margin-top: var(--sp-4);
 }
 
+/* ---------- Cabecera de sala con Banner Panorámico del Dragón ---------- */
+.sala-cabecera-banner {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.32), 0 2px 8px rgba(0, 0, 0, 0.18);
+  border: 1.5px solid rgba(255, 255, 255, 0.28);
+  line-height: 0;
+  background: var(--sala-dark, #076b7a);
+  transition: transform var(--dur) var(--ease-out), box-shadow var(--dur) ease;
+}
+@media (hover: hover) {
+  .sala-cabecera-banner:hover {
+    box-shadow: 0 16px 42px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.22);
+  }
+}
+.sala.destacada .sala-cabecera-banner {
+  box-shadow: 0 0 0 3px var(--page), 0 0 0 6px var(--sala), 0 16px 40px rgba(0, 0, 0, 0.4);
+}
+.sala-banner-img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4128 / 1024;
+  display: block;
+  object-fit: cover;
+}
+
 .sala-cabecera {
   position: relative;
   overflow: hidden;
