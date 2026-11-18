@@ -95,8 +95,6 @@
 @media (max-width: 599px) {
   .hero.compacto .hero-banner-img { height: 150px; }
 }
-/* Sin llegada por QR el banner queda pegado a la barra de salas; con el cartel del QR se mantiene su separación */
-.qr-arrival[hidden] + .barra { margin-top: 0; }
 
 .hero-meta {
   margin: var(--sp-3) auto 0;
@@ -250,7 +248,7 @@
   background: var(--bar-bg);
   border-bottom: 1px solid var(--line);
   padding: var(--sp-2) max(var(--sp-3), env(safe-area-inset-right)) 0 max(var(--sp-3), env(safe-area-inset-left));
-  margin-top: var(--sp-4);
+  margin-top: 0;
 }
 body[data-sala] .barra {
   border-bottom: 3px solid var(--sala);
@@ -272,7 +270,7 @@ body[data-sala] .barra {
 .chips {
   display: flex;
   flex-wrap: nowrap;
-  gap: var(--sp-2);
+  gap: 0.75rem; /* más que el aro del grado actual (4,5 px por lado): los botones no se tocan */
   margin-top: 0;
   overflow-x: auto;
   overflow-y: hidden;
@@ -284,9 +282,9 @@ body[data-sala] .barra {
 }
 .chips::-webkit-scrollbar { display: none; }
 /* Se nota que hay más salas hacia el costado: el borde se desvanece donde sigue la barra (clases que pone el JS) */
-.chips.hay-mas-der { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 34px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 34px), transparent); }
-.chips.hay-mas-izq { -webkit-mask-image: linear-gradient(to left, #000 calc(100% - 34px), transparent); mask-image: linear-gradient(to left, #000 calc(100% - 34px), transparent); }
-.chips.hay-mas-der.hay-mas-izq { -webkit-mask-image: linear-gradient(to right, transparent, #000 34px, #000 calc(100% - 34px), transparent); mask-image: linear-gradient(to right, transparent, #000 34px, #000 calc(100% - 34px), transparent); }
+.chips.hay-mas-der { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent); }
+.chips.hay-mas-izq { -webkit-mask-image: linear-gradient(to left, #000 calc(100% - 24px), transparent); mask-image: linear-gradient(to left, #000 calc(100% - 24px), transparent); }
+.chips.hay-mas-der.hay-mas-izq { -webkit-mask-image: linear-gradient(to right, transparent, #000 24px, #000 calc(100% - 24px), transparent); mask-image: linear-gradient(to right, transparent, #000 24px, #000 calc(100% - 24px), transparent); }
 @media (min-width: 860px) {
   .chips {
     flex-wrap: wrap;
@@ -364,7 +362,7 @@ main {
   padding: var(--sp-2) max(0.85rem, env(safe-area-inset-right)) var(--sp-8) max(0.85rem, env(safe-area-inset-left));
 }
 .sala {
-  scroll-margin-top: 88px;
+  scroll-margin-top: var(--barra-alto, 76px); /* el scroll cae con el comienzo de la sala justo debajo de la barra fija */
   margin-top: var(--sp-8);
 }
 @media (min-width: 780px) {
@@ -374,79 +372,93 @@ main {
   margin-top: var(--sp-4);
 }
 
-/* ---------- Cabecera de sala con Banner Panorámico del Dragón ---------- */
-.sala-cabecera-banner {
+/* ---------- Encabezado de sala: escudo con su fondo + cartel con la frase ---------- */
+/* Dos piezas del mismo ancho, apiladas y centradas (máx. 760 px). El cartel crece con el texto. */
+.sala-encabezado {
+  --h-esc: clamp(170px, 47vw, 256px);      /* alto total del bloque del escudo según el ancho de pantalla */
+  --borde-enc: clamp(12px, 3.3vw, 24px);   /* grosor del marco del encabezado */
+  width: min(100%, 760px);
+  margin: 0 auto;
+}
+.sala-escudo {
   position: relative;
-  overflow: hidden;
-  border-radius: var(--radius-lg);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.32), 0 2px 8px rgba(0, 0, 0, 0.18);
-  border: 1.5px solid rgba(255, 255, 255, 0.28);
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  height: var(--h-esc);
+  margin: 0;
+  background: #efe3c9; /* crema del papel: se ve mientras cargan las imágenes */
   line-height: 0;
-  background: var(--sala-dark, #076b7a);
-  transition: transform var(--dur) var(--ease-out), box-shadow var(--dur) ease;
 }
-@media (hover: hover) {
-  .sala-cabecera-banner:hover {
-    box-shadow: 0 16px 42px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.22);
-  }
-}
-.sala.destacada .sala-cabecera-banner {
-  box-shadow: 0 0 0 3px var(--page), 0 0 0 6px var(--sala), 0 16px 40px rgba(0, 0, 0, 0.4);
-}
-.sala-banner-img {
-  width: 100%;
-  height: auto;
-  aspect-ratio: 4128 / 1024;
-  display: block;
-  object-fit: cover;
-}
-/* Nombre del grado y frase épica como texto real. Desde 640 px solo los lee el lector de pantalla (el banner ya los trae
-   dibujados); en pantallas angostas el dibujo queda chico y se muestran en una franja con el color del grado. */
-.sala-franja {
+/* Marco fino del arte original (esquinas ornamentadas + bordes que se estiran), por encima de la acuarela; su borde interior se
+   desvanece sobre ella. Se pide después de las primeras fotos (clase enc-listo); antes de eso no ocupa ni mueve nada. */
+.enc-listo .sala-escudo::after {
+  content: "";
   position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  border: var(--borde-enc) solid transparent;
+  border-image: url("../assets/escudos/marco-encabezado.webp") 33 / var(--borde-enc) / 0 stretch;
 }
-@media (max-width: 639px) {
-  .sala-franja {
-    position: static;
-    width: auto;
-    height: auto;
-    margin: 0;
-    overflow: visible;
-    clip: auto;
-    white-space: normal;
-    padding: 14px max(18px, env(safe-area-inset-right)) 18px max(18px, env(safe-area-inset-left));
-    background: var(--sala);   /* --sala-N del grado: texto blanco con contraste AA (≥ 5,7:1) */
-    color: var(--sala-on);
-    text-align: center;
-    line-height: 1.5;
-  }
-  .sala-franja-grado {
-    margin: 0;
-    font-family: var(--font-display);
-    font-weight: 800;
-    font-size: var(--fs-grado);
-    line-height: 1.25;
-  }
-  .sala-franja-frase {
-    margin: 0.5rem auto 0;
-    max-width: 36rem;
-    font-family: "trajan-pro-3", "Trajan Pro 3", "Trajan Pro", "Cinzel", Georgia, serif;
-    font-weight: 600;
-    font-size: var(--fs-frase);
-    line-height: 1.55;
-    /* Cinzel 600 en versalitas: un poco de aire entre letras y palabras la hace más legible en pantallas chicas */
-    letter-spacing: 0.03em;
-    word-spacing: 0.1em;
-    text-wrap: pretty;
-  }
+.sala-escudo-fondo {
+  position: absolute;
+  inset: calc(var(--borde-enc) * 0.45); /* entra por debajo del marco para que no se vea ninguna costura */
+  width: calc(100% - var(--borde-enc) * 0.9);
+  height: calc(100% - var(--borde-enc) * 0.9);
+  object-fit: cover; /* acuarela del banner anterior, ya sin escudo ni frase; el mismo archivo para las 7 salas */
 }
+.sala-escudo-img {
+  position: relative;
+  display: block;
+  height: calc(var(--h-esc) - 2 * var(--borde-enc) - 6px);
+  width: auto;
+  max-width: 96%;
+  object-fit: contain;
+}
+.sala-cartel {
+  --marco: clamp(26px, 7vw, 44px);
+  --relleno: #0b3f4f;
+  position: relative;
+  z-index: 1;
+  margin-top: 8px; /* hueco chico entre el escudo y el cartel: no se tocan */
+  /* Marco del arte original recortado en 9 trozos (esquinas ornamentadas + bordes que se estiran) */
+  border: var(--marco) solid transparent;
+  background: var(--relleno);
+  color: #f7efdc;
+  text-align: center;
+  padding: clamp(2px, 1.5vw, 8px) clamp(4px, 2.5vw, 22px) clamp(4px, 2vw, 12px);
+  box-shadow: 0 10px 18px -8px rgba(0, 0, 0, 0.45);
+  line-height: 1.5;
+}
+/* El marco se pide recién cuando terminaron de cargar las primeras fotos (clase puesta desde expo-app.js);
+   hasta entonces el borde es del color de relleno, con el mismo grosor, así que nada se mueve. */
+.enc-listo .sala-cartel { border-image: url("../assets/escudos/marco-cartel.webp") 92 / var(--marco) / 0 stretch; }
+/* Relleno del cartel de cada grado (medido del arte original); la frase crema #f7efdc tiene contraste AA ≥ 6,8:1 sobre todos */
+.sala-1 .sala-cartel { --relleno: #0b3f4f; }
+.sala-2 .sala-cartel { --relleno: #361145; }
+.sala-3 .sala-cartel { --relleno: #03346b; }
+.sala-4 .sala-cartel { --relleno: #145531; }
+.sala-5 .sala-cartel { --relleno: #7d4301; }
+.sala-6 .sala-cartel { --relleno: #930f3f; }
+.sala-7 .sala-cartel { --relleno: #161b4e; }
+.sala-cartel-frase {
+  margin: 0 auto;
+  max-width: 40rem;
+  font-family: "trajan-pro-3", "Trajan Pro 3", "Trajan Pro", "Cinzel", Georgia, serif;
+  font-weight: 600;
+  /* con la letra del sistema muy grande y pantalla angosta no deja que una palabra larga se salga del cartel */
+  font-size: min(var(--fs-frase), 6.6vw);
+  overflow-wrap: break-word;
+  line-height: 1.55;
+  /* Cinzel 600 en versalitas: un poco de aire entre letras y palabras la hace más legible en pantallas chicas */
+  letter-spacing: 0.03em;
+  word-spacing: 0.1em;
+  text-wrap: pretty;
+}
+/* Sala sin frase: queda solo el escudo, con las esquinas de abajo redondeadas */
+.sala-encabezado.sin-frase .sala-cartel { display: none; }
+.sala.destacada .sala-encabezado { filter: none; }
 
 .sala-cabecera {
   position: relative;
@@ -845,7 +857,7 @@ main {
   margin: var(--sp-12) auto 0;
   padding: var(--sp-10) max(1rem, env(safe-area-inset-right)) 0 max(1rem, env(safe-area-inset-left));
   border-top: 2px dotted var(--line);
-  scroll-margin-top: 80px;
+  scroll-margin-top: var(--barra-alto, 76px);
 }
 .libro-head {
   display: flex;
@@ -1440,7 +1452,7 @@ footer {
   border-radius: var(--radius-pill);
   background: var(--sala);
   /* Aro del grado en pantalla: separación de la barra + anillo de alto contraste (claro u oscuro según el modo) */
-  box-shadow: 0 0 0 3px var(--bar-bg), 0 0 0 5.5px var(--ink);
+  box-shadow: 0 0 0 2px var(--bar-bg), 0 0 0 4.5px var(--ink);
   opacity: 0;
   pointer-events: none;
   will-change: transform; /* capa propia estable: deslizarla no obliga a repintar la barra */
@@ -1655,14 +1667,13 @@ footer {
 }
 
 /* ---------- Lectura en celular: saltos de línea cuidados ---------- */
-.sala-franja-frase,
+.sala-cartel-frase,
 .msg-texto,
 .v-desc,
 .credito p,
 .qr-arrival-copy span,
 .estado-vacio,
 .campo-meta { text-wrap: pretty; }
-.sala-franja-grado,
 .v-autor,
 .libro-head h2,
 .qr-arrival-copy strong,

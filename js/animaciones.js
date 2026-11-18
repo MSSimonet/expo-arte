@@ -86,6 +86,17 @@
     global.setTimeout(fin, max + (extraMs || 120));
   }
 
+  /** Publica el alto real de la barra fija como --barra-alto: de ahí salen el scroll-margin de cada sala (donde cae el
+   *  scroll al tocar un botón) y la línea de llegada del grado en pantalla, así que siempre coinciden. */
+  function publicarAltoBarra() {
+    var b = doc.querySelector('.barra');
+    if (!b) return;
+    function poner() { root.style.setProperty('--barra-alto', b.getBoundingClientRect().height + 'px'); }
+    poner();
+    if (global.ResizeObserver) new global.ResizeObserver(seguro(poner)).observe(b);
+    else global.addEventListener('resize', poner);
+  }
+
   function alturaBarra() {
     var b = doc.querySelector('.barra');
     return b ? b.offsetHeight : 70;
@@ -241,14 +252,13 @@
     pildoraVisible = true;
     marcarChip(chip);
 
-    // Que el chip marcado quede a la vista dentro de la fila deslizable.
-    if (alScroll && geoChips.desborda) {
-      var izq = g.x;
-      var der = izq + g.w;
-      if (izq < chipsScrollLeft + 8 || der > chipsScrollLeft + geoChips.ancho - 8) {
-        var meta = Math.max(0, izq - (geoChips.ancho - g.w) / 2);
+    // El chip marcado queda siempre centrado en la fila deslizable (los de las puntas llegan hasta donde el scroll permite).
+    if (geoChips.desborda) {
+      var maxIzq = el.chips.scrollWidth - geoChips.ancho;
+      var meta = Math.min(maxIzq, Math.max(0, g.x - (geoChips.ancho - g.w) / 2));
+      if (Math.abs(meta - chipsScrollLeft) > 2) {
         if (el.chips.scrollTo) {
-          el.chips.scrollTo({ left: meta, behavior: reducido ? 'auto' : 'smooth' });
+          el.chips.scrollTo({ left: meta, behavior: (reducido || !alScroll) ? 'auto' : 'smooth' });
         } else {
           el.chips.scrollLeft = meta;
         }
@@ -288,12 +298,21 @@
     return lista;
   }
 
+  /**
+   * Grado en pantalla: la última sala cuyo comienzo ya llegó a su lugar, que es justo debajo de la barra fija (el mismo lugar
+   * donde cae el scroll al tocar un botón: scroll-margin-top = --barra-alto). Antes de que llegue no cambia.
+   */
   function decidirObjetivo(alScroll, forzar) {
-    var actual = null;
     var secciones = seccionesEspiadas();
+    var barra = doc.querySelector('.barra');
+    var linea = (barra ? barra.getBoundingClientRect().bottom : 0) + 3; // 3 px de tolerancia por redondeo
+    var actual = null;
     for (var i = 0; i < secciones.length; i++) {
-      if (enBanda.indexOf(secciones[i]) !== -1) { actual = secciones[i]; break; }
+      if (secciones[i].getBoundingClientRect().top <= linea) actual = secciones[i];
+      else break;
     }
+    var alFinal = global.innerHeight + global.scrollY >= doc.documentElement.scrollHeight - 2;
+    if (alFinal && secciones.length) actual = secciones[secciones.length - 1];
     var id = null;
     if (actual && actual.classList.contains('sala')) {
       id = actual.id;
@@ -307,19 +326,19 @@
     moverPildora(chipDe(id), alScroll);
   }
 
-  function crearEspia() {
-    if (ioEspia) ioEspia.disconnect();
-    enBanda = [];
-    var arriba = alturaBarra() + 8;
-    ioEspia = new IntersectionObserver(seguro(function (entradas) {
-      entradas.forEach(function (en) {
-        var idx = enBanda.indexOf(en.target);
-        if (en.isIntersecting && idx === -1) enBanda.push(en.target);
-        if (!en.isIntersecting && idx !== -1) enBanda.splice(idx, 1);
-      });
+  var espiaPendiente = false;
+  function programarEspia() {
+    if (espiaPendiente) return;
+    espiaPendiente = true;
+    global.requestAnimationFrame(seguro(function () {
+      espiaPendiente = false;
       decidirObjetivo(true);
-    }), { rootMargin: '-' + arriba + 'px 0px -58% 0px', threshold: 0 });
-    seccionesEspiadas().forEach(function (s) { ioEspia.observe(s); });
+    }));
+  }
+
+  function crearEspia() {
+    // Cada vez que se redibujan las salas o cambia el tamaño: se mide de nuevo (el scroll ya está escuchado en init)
+    programarEspia();
   }
 
   /* ---------- 4. Me gusta: estallido, latido y contador ---------- */
@@ -682,6 +701,8 @@
       doc.querySelectorAll('.esqueleto').forEach(observarContinua);
 
       global.addEventListener('scroll', medirScroll, { passive: true });
+      global.addEventListener('scroll', programarEspia, { passive: true });
+      publicarAltoBarra();
 
       ioRevelar = new IntersectionObserver(seguro(function (entradas) {
         var n = 0;

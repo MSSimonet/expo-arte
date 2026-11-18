@@ -22,11 +22,6 @@
   var els = {
     demoStrip: document.getElementById('demoStrip'),
     hero: document.getElementById('inicio'),
-    qrArrival: document.getElementById('qrArrival'),
-    qrArrivalBadge: document.getElementById('qrArrivalBadge'),
-    qrArrivalTitle: document.getElementById('qrArrivalTitle'),
-    qrArrivalSubtitle: document.getElementById('qrArrivalSubtitle'),
-    btnVerTodas: document.getElementById('btnVerTodas'),
     chipsSalas: document.getElementById('chipsSalas'),
     salasMain: document.getElementById('salas'),
     msgForm: document.getElementById('msgForm'),
@@ -120,28 +115,20 @@
     return scanned.concat(rest);
   }
 
+  /** Llegada por QR: la sala del QR va primero y la barra ofrece "Todas"; ya no se muestra ningún aviso aparte. */
   function updateQrArrivalBanner() {
     state.qrSalaId ? document.body.setAttribute('data-sala', state.qrSalaId) : document.body.removeAttribute('data-sala');
     if (!state.qrSalaId) {
-      els.qrArrival.hidden = true;
       els.hero.classList.remove('compacto');
       document.documentElement.style.setProperty('--hero-accent', '#086978');
       return;
     }
 
     var sala = state.salas.find(function (s) { return s.id === state.qrSalaId; });
-    if (!sala) {
-      els.qrArrival.hidden = true;
-      return;
-    }
+    if (!sala) return;
 
     els.hero.classList.add('compacto');
     document.documentElement.style.setProperty('--hero-accent', sala.color_dark || '#0b7d8e');
-    els.qrArrival.style.setProperty('--arrival-color', sala.color_dark || '#1a5da8');
-    els.qrArrivalBadge.textContent = sala.grado + ' grado';
-    els.qrArrivalTitle.textContent = 'Escaneaste el QR de ' + sala.nombre.toLowerCase();
-    els.qrArrivalSubtitle.textContent = 'Ya estás viendo su sala primero. Si querés, podés recorrer los demás grados desde acá.';
-    els.qrArrival.hidden = false;
   }
 
   /** Marca con una clase si la barra de salas tiene más salas hacia un costado (el CSS desvanece ese borde) */
@@ -238,6 +225,11 @@
     });
   }
 
+  /** "Primer grado" → "Primer Grado" (para el texto alternativo del escudo) */
+  function tituloNombre(nombre) {
+    return String(nombre || '').replace(/(^|\s)(\S)/g, function (m, a, b) { return a + b.toUpperCase(); });
+  }
+
   function renderSalas() {
     var orderedSalas = getOrderedSalas();
     var html = '';
@@ -248,22 +240,22 @@
       var isHighlighted = state.qrSalaId === sala.id;
 
       html += '<section class="sala sala-' + sala.id + (isHighlighted ? ' destacada' : '') + '" id="sala-' + sala.id + '" aria-label="Sala de ' + escapeHtml(sala.grado) + ' grado">';
-      var bannerUrl = 'assets/banners/banner-sala-' + sala.id + '.webp?v=2';
-      var bannerSmUrl = 'assets/banners/banner-sala-' + sala.id + '-sm.webp?v=2';
       var desc = sala.desc_a || sala.desc_b || '';
 
-      // El banner es solo decorativo (alt vacío): el nombre del grado y la frase son texto real en .sala-franja,
-      // que se ve debajo del banner en pantallas angostas y queda solo para lectores de pantalla desde 640 px.
-      html += '<div class="sala-cabecera-banner">'
-        + '<picture>'
-        + '<source srcset="' + bannerSmUrl + '" media="(max-width: 600px)" type="image/webp" />'
-        + '<source srcset="' + bannerUrl + '" type="image/webp" />'
-        + '<img class="sala-banner-img" src="' + bannerUrl + '" alt="" width="2048" height="508" loading="lazy" decoding="async" />'
-        + '</picture>'
-        + '<div class="sala-franja">'
-        + '<h2 class="sala-franja-grado">' + escapeHtml(sala.nombre) + '</h2>'
-        + (desc ? '<p class="sala-franja-frase">' + escapeHtml(desc) + '</p>' : '')
-        + '</div>'
+      // Encabezado: escudo con su fondo (imágenes) + cartel con la frase (texto real). La sala que se ve primero
+      // (la del QR o, si no hay, la primera) carga sus imágenes con prioridad; las demás, de forma diferida.
+      // Para no competir por ancho de banda con las primeras fotos, la sala visible arranca con un pixel vacío y
+      // pone el escudo recién cuando esas fotos terminan de cargar (ver liberarEncabezado).
+      var primeraVisible = state.qrSalaId ? isHighlighted : sala.id === orderedSalas[0].id;
+      var srcFondo = 'assets/escudos/fondo-acuarela.webp?v=1', srcEscudo = 'assets/escudos/escudo-' + sala.id + '.webp?v=2';
+      var cargaImg = primeraVisible ? ' fetchpriority="high" decoding="async"' : ' loading="lazy" decoding="async"';
+      var pixel = 'data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=';
+      html += '<div class="sala-encabezado' + (desc ? '' : ' sin-frase') + '">'
+        + '<h2 class="sala-escudo">'
+        + '<img class="sala-escudo-fondo" src="' + (primeraVisible ? pixel + '" data-src="' + srcFondo : srcFondo) + '" alt="" width="760" height="258"' + cargaImg + ' />'
+        + '<img class="sala-escudo-img" src="' + (primeraVisible ? pixel + '" data-src="' + srcEscudo : srcEscudo) + '" alt="Escudo de ' + escapeHtml(tituloNombre(sala.nombre)) + '" width="480" height="326"' + cargaImg + ' />'
+        + '</h2>'
+        + '<div class="sala-cartel">' + (desc ? '<p class="sala-cartel-frase">' + escapeHtml(desc) + '</p>' : '') + '</div>'
         + '<div class="sala-subbar"><span class="pastilla">' + escapeHtml(sala.nombre) + ' · ' + obrasSala.length + (obrasSala.length === 1 ? ' obra' : ' obras') + '</span></div>'
         + '</div>';
 
@@ -323,6 +315,23 @@
     });
 
     els.salasMain.innerHTML = html;
+    liberarEncabezado();
+  }
+
+  /** Pone el escudo de la sala visible y el marco del cartel cuando ya cargaron las primeras fotos (o a los 5 s). */
+  function liberarEncabezado() {
+    var raiz = global.document.documentElement;
+    function poner() {
+      Array.prototype.forEach.call(els.salasMain.querySelectorAll('img[data-src]'), function (img) {
+        img.src = img.getAttribute('data-src');
+        img.removeAttribute('data-src');
+      });
+      raiz.classList.add('enc-listo');
+    }
+    if (raiz.classList.contains('enc-listo')) { poner(); return; }
+    var hecho = false;
+    function una() { if (!hecho) { hecho = true; poner(); } }
+    esperarPrimerasFotos(5000).then(una);
   }
 
   function renderMensajes() {
@@ -585,7 +594,6 @@
       renderSalas();
     }
 
-    els.btnVerTodas.addEventListener('click', clearQrFocus);
     els.chipsSalas.addEventListener('scroll', pistasDeLaBarra, { passive: true });
     global.addEventListener('resize', pistasDeLaBarra);
     global.addEventListener('load', pistasDeLaBarra);
@@ -699,22 +707,24 @@
       var seccion = document.getElementById('sala-' + sala.id);
       if (!seccion) return;
       var texto = sala.desc_a || sala.desc_b || '';
-      var franja = seccion.querySelector('.sala-franja');
-      if (!franja) return;
-      var h = franja.querySelector('.sala-franja-grado');
-      if (h && sala.nombre && h.textContent !== sala.nombre) h.textContent = sala.nombre;
-      var p = franja.querySelector('.sala-franja-frase');
+      var enc = seccion.querySelector('.sala-encabezado');
+      if (!enc) return;
+      var escudo = enc.querySelector('.sala-escudo-img');
+      if (escudo && sala.nombre) escudo.alt = 'Escudo de ' + tituloNombre(sala.nombre);
+      var cartel = enc.querySelector('.sala-cartel');
+      var p = enc.querySelector('.sala-cartel-frase');
+      enc.classList.toggle('sin-frase', !texto);
       if (!texto) {
         if (p) p.remove();
         return;
       }
       if (p) {
         if (p.textContent !== texto) p.textContent = texto;
-      } else {
+      } else if (cartel) {
         p = document.createElement('p');
-        p.className = 'sala-franja-frase';
+        p.className = 'sala-cartel-frase';
         p.textContent = texto;
-        franja.appendChild(p);
+        cartel.appendChild(p);
       }
     });
   }
