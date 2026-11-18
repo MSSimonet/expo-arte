@@ -83,15 +83,21 @@ Podés hacerlo de cualquiera de estas dos maneras:
 - **O desde el navegador:** abrí `admin.html`, pegá la URL y la clave en **Conectar con Supabase** y tocá **Descargar js/config.js para GitHub** para reemplazar el archivo `js/config.js`.
 
 ### Paso 3: Subir a GitHub Pages (gratis)
-1. Creá un repositorio nuevo en GitHub (por ejemplo `pequenos-grandes-artistas`).
+1. Creá un repositorio nuevo en GitHub (este proyecto usa `expo-arte`).
 2. Subí todos los archivos del proyecto (`index.html`, `admin.html`, `qr-imprimir.html`, `obras.json`, `assets/` (incluye `assets/obras/`), `styles/`, `js/`, `.nojekyll`). La carpeta `Obras/` **no** se sube.
 3. Entrá a **Settings → Pages** en tu repositorio:
    - En **Source** elegí **Deploy from a branch**.
    - Elegí rama `main` y carpeta `/ (root)` → **Save**.
-4. En ~1 minuto tu web queda publicada en `https://tu-usuario.github.io/pequenos-grandes-artistas/`.
+4. En ~1 minuto tu web queda publicada en `https://mssimonet.github.io/expo-arte/`.
 
 ### Paso 4: Imprimir los QR
-1. Abrí `https://tu-usuario.github.io/pequenos-grandes-artistas/qr-imprimir.html`.
+1. Abrí `https://mssimonet.github.io/expo-arte/qr-imprimir.html`.
 2. Verificá que la URL superior sea la dirección pública de GitHub Pages (sin `localhost` ni `file://`).
 3. Elegí **1 cartel grande por hoja A4** (para paredes/puertas) o **2 tarjetas por hoja A4** (para mesas).
 4. Tocá **Imprimir / Guardar PDF**.
+
+### Regenerar los QR de `QR/`
+Los afiches de `qr-imprimir.html` no se generan en el navegador: usan las imágenes PNG de la carpeta `QR/` (`qr_general.png` y `qr_1ro.png` a `qr_7mo.png`).
+1. Generá cada código con la dirección pública: `https://mssimonet.github.io/expo-arte/` para el general y `https://mssimonet.github.io/expo-arte/?sala=N` para cada grado (N = 1 a 7). Podés usar cualquier generador de QR, o el paquete `qrcode` ya incluido en el proyecto.
+2. Guardá los PNG en `QR/` con esos mismos nombres, reemplazando los anteriores.
+3. Publicá los cambios y abrí `qr-imprimir.html` para imprimir. Probá cada QR con el celular antes de imprimir.

@@ -9,3 +9,13 @@ playwright-report/
 /Obras/
 # SQL local para cambiar el número de acceso docente (contiene el número real: NUNCA se sube)
 supabase-rotar-pin.sql
+
+# Herramientas, pruebas y borradores locales (no forman parte del sitio)
+/framing_tool.py
+/process_expo.py
+/process_folder_expo*.py
+/ejemplo_enmarcado.jpg
+/scratch_*/
+/imagenes/
+# Banners originales de gran tamaño (el sitio usa assets/banners/)
+/banners/

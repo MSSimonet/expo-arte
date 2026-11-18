@@ -1,11 +1,11 @@
 {
   "name": "expo",
   "version": "1.0.0",
-  "description": "",
+  "description": "Muestra interactiva de arte \"Pequeños grandes artistas\" con salas por grado, QR y Supabase",
   "main": "index.js",
   "scripts": {
     "obras": "node scripts/generar-obras.mjs",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Sin pruebas automáticas\" && exit 0"
   },
   "keywords": [],
   "author": "",
