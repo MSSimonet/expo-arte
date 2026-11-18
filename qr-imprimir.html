@@ -27,9 +27,12 @@
 
       <div class="qr-controls">
         <div class="qr-controls-row">
-          <div>
-            <label for="qrBaseUrl">Dirección pública de la muestra (URL de GitHub Pages)</label>
-            <input type="url" id="qrBaseUrl" placeholder="https://tu-usuario.github.io/expo-arte/" />
+          <div class="qr-source-info">
+            <span class="qr-source-label">Origen de los códigos QR</span>
+            <div class="qr-source-badge">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+              Imágenes oficiales: <code>QR/</code>
+            </div>
           </div>
           <div>
             <label for="qrLayout">Tamaño de impresión (A4)</label>
@@ -46,10 +49,6 @@
           </div>
         </div>
 
-        <div class="qr-warning" id="qrLocalWarning" hidden>
-          Atención: la URL actual parece local (file:// o localhost). Antes de imprimir los carteles para el público, pegá arriba la dirección definitiva de GitHub Pages (ej. https://tu-usuario.github.io/pequenos-artistas/).
-        </div>
-
         <div class="qr-checks" id="qrChecks"></div>
       </div>
     </div>
@@ -57,7 +56,6 @@
 
   <main class="qr-sheet-wrap layout-1up" id="qrSheetWrap"></main>
 
-  <script src="js/vendor/qrcode.min.js"></script>
   <script src="js/config.js"></script>
   <script src="js/qr-app.js"></script>
 </body>

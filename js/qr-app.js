@@ -1,19 +1,40 @@
 /**
- * Generador local de códigos QR por grado (1° a 7°) + cartel general, listos para imprimir en A4.
+ * Generador de afiches/carteles QR por grado (1° a 7°) + cartel general, listos para imprimir en A4.
+ * Los códigos QR provienen de archivos PNG estáticos en la carpeta QR/.
  */
 (function (global) {
   'use strict';
 
   var els = {
-    baseUrl: document.getElementById('qrBaseUrl'),
     layout: document.getElementById('qrLayout'),
     btnPrint: document.getElementById('btnPrintAll'),
-    warning: document.getElementById('qrLocalWarning'),
     checks: document.getElementById('qrChecks'),
     wrap: document.getElementById('qrSheetWrap')
   };
 
-  var selectedIds = { general: false, 1: true, 2: true, 3: true, 4: true, 5: true, 6: true, 7: true };
+  var selectedIds = { general: true, 1: true, 2: true, 3: true, 4: true, 5: true, 6: true, 7: true };
+
+  var QR_IMAGE_MAP = {
+    general: 'QR/qr_general.png',
+    1: 'QR/qr_1ro.png',
+    2: 'QR/qr_2do.png',
+    3: 'QR/qr_3ro.png',
+    4: 'QR/qr_4to.png',
+    5: 'QR/qr_5to.png',
+    6: 'QR/qr_6to.png',
+    7: 'QR/qr_7mo.png'
+  };
+
+  var QR_DOWNLOAD_MAP = {
+    general: 'qr_general.png',
+    1: 'qr_1ro.png',
+    2: 'qr_2do.png',
+    3: 'qr_3ro.png',
+    4: 'qr_4to.png',
+    5: 'qr_5to.png',
+    6: 'qr_6to.png',
+    7: 'qr_7mo.png'
+  };
 
   function escapeHtml(str) {
     return String(str == null ? '' : str)
@@ -23,47 +44,21 @@
       .replace(/"/g, '&quot;');
   }
 
-  function inferDefaultBaseUrl() {
-    var loc = global.location;
-    if (loc.protocol === 'https:' || loc.protocol === 'http:') {
-      var dir = loc.pathname.replace(/[^/]*$/, '');
-      return loc.origin + dir;
-    }
-    return 'https://tu-usuario.github.io/pequenos-grandes-artistas/';
-  }
-
-  function normalizeBaseUrl(raw) {
-    var clean = String(raw || '').trim();
-    if (!clean) clean = inferDefaultBaseUrl();
-    clean = clean.replace(/index\.html$/i, '').replace(/qr-imprimir\.html$/i, '');
-    if (!/\/$/.test(clean) && clean.indexOf('?') === -1) clean += '/';
-    return clean;
-  }
-
-  function updateLocalWarning(url) {
-    var isLocal = /^file:|^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])/i.test(url) || url.indexOf('tu-usuario.github.io') !== -1;
-    els.warning.hidden = !isLocal;
-  }
-
   function renderChecks() {
     var html = '<label class="qr-check"><input type="checkbox" data-pick="general"' + (selectedIds.general ? ' checked' : '') + ' /> Cartel general (Entrada)</label>';
-    global.SALAS_DEFAULT.forEach(function (s) {
+    (global.SALAS_DEFAULT || []).forEach(function (s) {
       html += '<label class="qr-check"><input type="checkbox" data-pick="' + s.id + '"' + (selectedIds[s.id] ? ' checked' : '') + ' /> ' + escapeHtml(s.grado) + ' grado</label>';
     });
-    els.checks.innerHTML = html;
+    if (els.checks) {
+      els.checks.innerHTML = html;
+    }
   }
 
-  function buildTargetUrl(baseUrl, salaId) {
-    if (!salaId) return baseUrl;
-    var sep = baseUrl.indexOf('?') === -1 ? '?' : '&';
-    return baseUrl + sep + 'sala=' + salaId;
-  }
+  function renderPosters() {
+    if (!els.wrap) return;
 
-  async function renderPosters() {
-    var baseUrl = normalizeBaseUrl(els.baseUrl.value);
-    updateLocalWarning(baseUrl);
-
-    els.wrap.className = 'qr-sheet-wrap ' + (els.layout.value === '2up' ? 'layout-2up' : 'layout-1up');
+    var layoutVal = els.layout ? els.layout.value : '1up';
+    els.wrap.className = 'qr-sheet-wrap ' + (layoutVal === '2up' ? 'layout-2up' : 'layout-1up');
 
     var cards = [];
     if (selectedIds.general) {
@@ -73,12 +68,12 @@
         subtitle: '1° a 7° grado · Muestra de arte',
         hint: 'Escaneá el código con tu celular para recorrer todas las salas de la exposición.',
         color: '#14532f',
-        url: buildTargetUrl(baseUrl, null),
-        filename: 'qr-muestra-general.png'
+        qrSrc: QR_IMAGE_MAP.general,
+        filename: QR_DOWNLOAD_MAP.general
       });
     }
 
-    global.SALAS_DEFAULT.forEach(function (s) {
+    (global.SALAS_DEFAULT || []).forEach(function (s) {
       if (!selectedIds[s.id]) return;
       cards.push({
         key: 'sala-' + s.id,
@@ -86,13 +81,13 @@
         subtitle: s.nombre,
         hint: 'Escaneá el código con tu celular para ver las obras de ' + s.grado + ' grado y recorrer el resto de la muestra.',
         color: s.color_dark,
-        url: buildTargetUrl(baseUrl, s.id),
-        filename: 'qr-sala-' + s.id + '-grado.png'
+        qrSrc: QR_IMAGE_MAP[s.id] || ('QR/qr_' + s.id + '.png'),
+        filename: QR_DOWNLOAD_MAP[s.id] || ('qr_sala_' + s.id + '.png')
       });
     });
 
     if (!cards.length) {
-      els.wrap.innerHTML = '<div class="estado-vacio">Marcá al menos un grado arriba para generar su cartel QR.</div>';
+      els.wrap.innerHTML = '<div class="estado-vacio">Marcá al menos un grado arriba para ver o imprimir su afiche QR.</div>';
       return;
     }
 
@@ -100,45 +95,29 @@
     cards.forEach(function (c, i) {
       html += '<article class="qr-poster" style="--poster-color:' + escapeHtml(c.color) + '">'
         + '<header class="qr-poster-band">'
-        + '<div class="qr-poster-school">' + escapeHtml(global.EXPO_CONFIG.schoolName) + '</div>'
-        + '<h2 class="qr-poster-title">' + escapeHtml(global.EXPO_CONFIG.expoTitle) + '</h2>'
+        + '<div class="qr-poster-school">' + escapeHtml(global.EXPO_CONFIG ? global.EXPO_CONFIG.schoolName : '') + '</div>'
+        + '<h2 class="qr-poster-title">' + escapeHtml(global.EXPO_CONFIG ? global.EXPO_CONFIG.expoTitle : 'Exposición de Arte') + '</h2>'
         + '</header>'
         + '<div class="qr-poster-body">'
         + '<div class="qr-poster-grade">' + escapeHtml(c.title) + '</div>'
         + '<div class="qr-poster-shift">' + escapeHtml(c.subtitle) + '</div>'
-        + '<div class="qr-code-box"><img id="qr-img-' + i + '" alt="Código QR para ' + escapeHtml(c.title) + '" /></div>'
+        + '<div class="qr-code-box"><img src="' + escapeHtml(c.qrSrc) + '" alt="Código QR para ' + escapeHtml(c.title) + '" loading="eager" /></div>'
         + '<p class="qr-poster-hint">' + escapeHtml(c.hint) + '</p>'
-        + '<div class="qr-poster-url">' + escapeHtml(c.url) + '</div>'
-        + '<div class="qr-poster-date">' + escapeHtml(global.EXPO_CONFIG.expoDate) + '</div>'
+        + '<div class="qr-poster-date">' + escapeHtml(global.EXPO_CONFIG ? global.EXPO_CONFIG.expoDate : '') + '</div>'
         + '<div class="qr-poster-actions">'
-        + '<a class="btn" href="' + escapeHtml(c.url) + '" target="_blank" rel="noopener">Probar enlace</a>'
-        + '<button type="button" class="btn btn-primary" data-dl-qr="' + i + '">Descargar PNG</button>'
+        + '<button type="button" class="btn btn-primary" data-dl-qr="' + i + '">Descargar código QR</button>'
         + '</div>'
         + '</div></article>';
     });
     els.wrap.innerHTML = html;
 
-    for (var i = 0; i < cards.length; i++) {
-      var imgEl = document.getElementById('qr-img-' + i);
-      if (imgEl && global.QRCode && typeof global.QRCode.toDataURL === 'function') {
-        var dataUrl = await global.QRCode.toDataURL(cards[i].url, {
-          width: 640,
-          margin: 2,
-          errorCorrectionLevel: 'M',
-          color: { dark: '#111820', light: '#ffffff' }
-        });
-        imgEl.src = dataUrl;
-        cards[i].dataUrl = dataUrl;
-      }
-    }
-
     els.wrap.querySelectorAll('[data-dl-qr]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         var idx = parseInt(btn.getAttribute('data-dl-qr'), 10);
         var card = cards[idx];
-        if (!card || !card.dataUrl) return;
+        if (!card || !card.qrSrc) return;
         var a = document.createElement('a');
-        a.href = card.dataUrl;
+        a.href = card.qrSrc;
         a.download = card.filename;
         document.body.appendChild(a);
         a.click();
@@ -148,23 +127,31 @@
   }
 
   function init() {
-    els.baseUrl.value = inferDefaultBaseUrl();
     renderChecks();
     renderPosters();
 
-    els.baseUrl.addEventListener('input', renderPosters);
-    els.layout.addEventListener('change', renderPosters);
-    els.checks.addEventListener('change', function (e) {
-      var pick = e.target.getAttribute('data-pick');
-      if (pick) {
-        selectedIds[pick] = e.target.checked;
-        renderPosters();
-      }
-    });
-    els.btnPrint.addEventListener('click', function () {
-      global.print();
-    });
+    if (els.layout) {
+      els.layout.addEventListener('change', renderPosters);
+    }
+    if (els.checks) {
+      els.checks.addEventListener('change', function (e) {
+        var pick = e.target.getAttribute('data-pick');
+        if (pick) {
+          selectedIds[pick] = e.target.checked;
+          renderPosters();
+        }
+      });
+    }
+    if (els.btnPrint) {
+      els.btnPrint.addEventListener('click', function () {
+        global.print();
+      });
+    }
   }
 
-  init();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 })(window);
