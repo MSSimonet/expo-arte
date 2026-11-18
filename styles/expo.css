@@ -460,6 +460,32 @@ main {
 .sala-encabezado.sin-frase .sala-cartel { display: none; }
 .sala.destacada .sala-encabezado { filter: none; }
 
+/* ---------- Encabezado de sala en escritorio (desde 1024 px; por debajo no cambia nada) ---------- */
+/* En escritorio el fondo del escudo es la acuarela con su marco ornamentado (fondo-sala.webp, 3406x1152 de origen):
+   el marco ya viene en la imagen, así que no se superpone el marco fino del celular. */
+@media (min-width: 1024px) {
+  .sala-encabezado {
+    width: 100%;                          /* mismo ancho que la zona de cuadros; la imagen se ve entera, con su marco */
+    container-type: inline-size;          /* 100cqw = ancho del encabezado: el alto sigue la proporción de la imagen */
+    --h-esc: calc(100cqw * 1152 / 3406);
+    --fs-frase-esc: clamp(1.25rem, 0.75rem + 0.8vw, 1.5rem);   /* 20 → 24 px */
+  }
+  .enc-listo .sala-escudo::after { display: none; }
+  .sala-escudo-fondo {
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 50%;
+  }
+  .sala-escudo-img { height: calc(var(--h-esc) * 0.82); }
+  .sala-cartel-frase {
+    max-width: 60ch;                  /* renglones de lectura cómoda, centrados dentro del cartel */
+    font-size: var(--fs-frase-esc);
+    line-height: 1.5;
+  }
+  .sala-cartel { padding-top: 10px; padding-bottom: 14px; }
+}
 .sala-cabecera {
   position: relative;
   overflow: hidden;

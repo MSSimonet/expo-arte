@@ -247,12 +247,14 @@
       // Para no competir por ancho de banda con las primeras fotos, la sala visible arranca con un pixel vacío y
       // pone el escudo recién cuando esas fotos terminan de cargar (ver liberarEncabezado).
       var primeraVisible = state.qrSalaId ? isHighlighted : sala.id === orderedSalas[0].id;
-      var srcFondo = 'assets/escudos/fondo-acuarela.webp?v=1', srcEscudo = 'assets/escudos/escudo-' + sala.id + '.webp?v=2';
+      // En escritorio (>= 1024 px) el fondo es la acuarela con marco ornamentado de 1600 px; en pantallas menores, el de siempre.
+      var esEscritorio = !!(global.matchMedia && global.matchMedia('(min-width: 1024px)').matches);
+      var srcFondo = esEscritorio ? FONDO_ANCHO : FONDO_BASE, srcEscudo = 'assets/escudos/escudo-' + sala.id + '.webp?v=2';
       var cargaImg = primeraVisible ? ' fetchpriority="high" decoding="async"' : ' loading="lazy" decoding="async"';
       var pixel = 'data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=';
       html += '<div class="sala-encabezado' + (desc ? '' : ' sin-frase') + '">'
         + '<h2 class="sala-escudo">'
-        + '<img class="sala-escudo-fondo" src="' + (primeraVisible ? pixel + '" data-src="' + srcFondo : srcFondo) + '" alt="" width="760" height="258"' + cargaImg + ' />'
+        + '<img class="sala-escudo-fondo" src="' + (primeraVisible ? pixel + '" data-src="' + srcFondo : srcFondo) + '" alt="" width="' + (esEscritorio ? 1600 : 760) + '" height="' + (esEscritorio ? 541 : 258) + '"' + cargaImg + ' />'
         + '<img class="sala-escudo-img" src="' + (primeraVisible ? pixel + '" data-src="' + srcEscudo : srcEscudo) + '" alt="Escudo de ' + escapeHtml(tituloNombre(sala.nombre)) + '" width="480" height="326"' + cargaImg + ' />'
         + '</h2>'
         + '<div class="sala-cartel">' + (desc ? '<p class="sala-cartel-frase">' + escapeHtml(desc) + '</p>' : '') + '</div>'
@@ -317,6 +319,27 @@
     els.salasMain.innerHTML = html;
     liberarEncabezado();
   }
+
+  var FONDO_BASE = 'assets/escudos/fondo-acuarela.webp?v=1';
+  var FONDO_ANCHO = 'assets/escudos/fondo-sala.webp?v=1';
+
+  /** Si la ventana cruza los 1024 px, cambia el fondo del escudo por el que corresponde (solo los ya cargados). */
+  function vigilarFondoAncho() {
+    if (!global.matchMedia) return;
+    var mq = global.matchMedia('(min-width: 1024px)');
+    function cambiar() {
+      Array.prototype.forEach.call(els.salasMain.querySelectorAll('img.sala-escudo-fondo'), function (img) {
+        var destino = mq.matches ? FONDO_ANCHO : FONDO_BASE;
+        var ancho = mq.matches ? 1600 : 760;
+        var alto = mq.matches ? 541 : 258;
+        if (img.hasAttribute('data-src')) { img.setAttribute('data-src', destino); }
+        else if (img.getAttribute('src') !== destino) { img.src = destino; }
+        img.width = ancho; img.height = alto;
+      });
+    }
+    if (mq.addEventListener) mq.addEventListener('change', cambiar); else if (mq.addListener) mq.addListener(cambiar);
+  }
+  vigilarFondoAncho();
 
   /** Pone el escudo de la sala visible y el marco del cartel cuando ya cargaron las primeras fotos (o a los 5 s). */
   function liberarEncabezado() {
