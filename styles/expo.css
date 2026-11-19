@@ -911,6 +911,9 @@ main {
 }
 @media (min-width: 1500px) {
   .galeria { --cols: 5; }
+  /* Obra que cierra su fila (ver ORDEN_FINAL en expo-app.js): 4 px de margen bastan para que no entre una quinta obra a su lado;
+     la fila queda de 4 obras, centrada, y las que siguen empiezan una fila nueva. */
+  .obra-card[data-corte-fila] { margin-right: 4px; }
   .esq-galeria { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 }
 

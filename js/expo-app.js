@@ -199,6 +199,7 @@
     function mapaDesde(json) {
       var mapa = {};
       (json && json.obras || []).forEach(function (o) {
+        if (o && o.origen) origenPorId[String(o.id)] = String(o.origen); // para ORDEN_FINAL (ver más abajo)
         if (o && o.tipo === 'video' && o.video) mapa[String(o.id)] = o;
       });
       return mapa;
@@ -220,6 +221,40 @@
       soltar: function () { global.fetch = original; }
     };
   }
+  /**
+   * Orden de la pared: obras que se cuelgan al final de su sala, en este orden (las demás conservan el de obras.json, que no se toca).
+   * Se identifican por el nombre del archivo original (campo "origen" de obras.json), no por posición. Si alguna no se
+   * encuentra, no se cambia nada. Los ids, los Me gusta y el "(N de M)" de cada obra no se alteran.
+   * `corte`: en pantallas de 5 columnas (>= 1500 px) esa obra cierra su fila, y las siguientes arrancan una fila nueva.
+   */
+  var ORDEN_FINAL = {
+    4: {
+      archivos: ['dibujo_4to_enmarcada.jpg', 'bandera_1_enmarcada.jpg', 'bandera_3_fachada_enmarcada.jpg', 'bandera_2_detalle_enmarcada.jpg'],
+      corte: 'dibujo_4to_enmarcada.jpg'
+    }
+  };
+  var origenPorId = {};
+
+  function aplicarOrdenFinal() {
+    Object.keys(ORDEN_FINAL).forEach(function (salaId) {
+      var cfg = ORDEN_FINAL[salaId];
+      var movidas = [];
+      cfg.archivos.forEach(function (nombre) {
+        var obra = state.obras.find(function (x) {
+          return Number(x.sala_id) === Number(salaId) && String(origenPorId[String(x.id)] || '').split('/').pop() === nombre;
+        });
+        if (obra) movidas.push(obra);
+      });
+      if (movidas.length !== cfg.archivos.length) return; // falta alguna: se respeta el orden de obras.json
+      var resto = state.obras.filter(function (x) { return movidas.indexOf(x) === -1; });
+      var ultimo = -1;
+      resto.forEach(function (x, i) { if (Number(x.sala_id) === Number(salaId)) ultimo = i; });
+      Array.prototype.splice.apply(resto, [ultimo + 1, 0].concat(movidas));
+      state.obras = resto;
+      movidas.forEach(function (o, i) { o.corteFila = cfg.archivos[i] === cfg.corte; });
+    });
+  }
+
   function aplicarDatosDeVideos(mapa) {
     state.obras.forEach(function (o) {
       var d = mapa[String(o.id)];
@@ -305,7 +340,7 @@
               + '</button>';
           }
 
-          html += '<article class="obra-card' + (esVideo ? ' obra-video' : '') + '" data-obra-idx="' + idx + '" data-obra-id="' + escapeHtml(obra.id) + '">'
+          html += '<article class="obra-card' + (esVideo ? ' obra-video' : '') + '" data-obra-idx="' + idx + '" data-obra-id="' + escapeHtml(obra.id) + '"' + (obra.corteFila ? ' data-corte-fila' : '') + '>'
             + cuerpo
             + '<div class="obra-pie">'
             + '<div class="obra-meta">'
@@ -858,6 +893,7 @@
       state.obras = res.data;
       state.mode = res.mode;
       aplicarDatosDeVideos(await Promise.race([escucha.promesa, new Promise(function (r) { global.setTimeout(function () { r({}); }, 400); })]));
+      aplicarOrdenFinal();
 
       els.demoStrip.hidden = state.mode === 'live';
       updateQrArrivalBanner();
