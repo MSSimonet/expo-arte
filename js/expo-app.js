@@ -270,14 +270,16 @@
         html += '<div class="estado-vacio">Todavía no se cargaron obras en ' + escapeHtml(sala.grado) + ' grado.</div>';
       } else {
         html += '<div class="galeria">';
-        obrasSala.forEach(function (obra) {
+        obrasSala.forEach(function (obra, posEnSala) {
+          // "(3 de 31)": sin autor ni título en los datos, es lo que distingue una foto de otra para un lector de pantalla
+          var lugar = ' (' + (posEnSala + 1) + ' de ' + obrasSala.length + ')';
           var idx = state.obras.indexOf(obra);
           var primaryLabel = obra.autor || obra.titulo || (sala.grado + ' grado');
           var primaryClass = (obra.autor || obra.titulo) ? 'obra-autor' : 'obra-autor sin-firma';
           var secondaryLabel = (obra.autor && obra.titulo) ? obra.titulo : '';
           var liked = global.ExpoStore.isObraLiked(obra.id);
           var likesCount = Number(obra.likes_count) || 0;
-          var alt = 'Obra' + (obra.autor ? ' de ' + obra.autor : (obra.titulo ? ': ' + obra.titulo : '')) + ', ' + sala.grado + ' grado';
+          var alt = 'Obra' + (obra.autor ? ' de ' + obra.autor : (obra.titulo ? ': ' + obra.titulo : '')) + ', ' + sala.grado + ' grado' + lugar;
           var esPrioritaria = fotosDibujadas < PRIORIDAD_FOTOS;
           fotosDibujadas++;
           // Proporción real de la foto (obras.json), limitada a 0,4–2,4; sin datos, la típica 1,3
@@ -289,7 +291,7 @@
           var esVideo = obra.tipo === 'video' && obra.video_url;
           var cuerpo;
           if (esVideo) {
-            var altV = 'Animación, ' + sala.grado + ' grado';
+            var altV = 'Animación, ' + sala.grado + ' grado' + lugar;
             var poster = escapeHtml(obra.thumb_url || obra.imagen_url);
             cuerpo = '<button type="button" class="obra-trigger" data-open-obra="' + idx + '" aria-label="Ver en grande y reproducir: ' + escapeHtml(altV) + '">'
               + '<span class="lienzo marco-video"><span class="perf" aria-hidden="true"></span>'
@@ -460,7 +462,8 @@
       };
       grande.src = obra.imagen_url;
     }
-    els.vImg.alt = 'Obra' + (obra.autor ? ' de ' + obra.autor : (obra.titulo ? ': ' + obra.titulo : '')) + ', ' + sala.grado + ' grado';
+    var delGrado = state.obras.filter(function (o) { return Number(o.sala_id) === Number(obra.sala_id); });
+    els.vImg.alt = 'Obra' + (obra.autor ? ' de ' + obra.autor : (obra.titulo ? ': ' + obra.titulo : '')) + ', ' + sala.grado + ' grado (' + (delGrado.indexOf(obra) + 1) + ' de ' + delGrado.length + ')';
     els.vAutor.textContent = obra.autor ? 'Obra de ' + obra.autor : (obra.titulo || ('Obra de ' + sala.grado + ' grado'));
     els.vAutor.hidden = !(obra.autor || obra.titulo);
 
