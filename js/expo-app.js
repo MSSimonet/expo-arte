@@ -116,16 +116,21 @@
   }
 
   /** Llegada por QR: la sala del QR va primero y la barra ofrece "Todas"; ya no se muestra ningún aviso aparte. */
+  var tituloBase = document.title; // título de la pestaña sin grado; se restituye al salir de la sala del QR
+
   function updateQrArrivalBanner() {
     state.qrSalaId ? document.body.setAttribute('data-sala', state.qrSalaId) : document.body.removeAttribute('data-sala');
     if (!state.qrSalaId) {
       els.hero.classList.remove('compacto');
       document.documentElement.style.setProperty('--hero-accent', '#086978');
+      document.title = tituloBase;
       return;
     }
 
     var sala = state.salas.find(function (s) { return s.id === state.qrSalaId; });
     if (!sala) return;
+    // Entrando por el QR de un grado, la pestaña (y el historial) dicen cuál: "Sala de 3° grado — Pequeños grandes artistas"
+    document.title = 'Sala de ' + sala.grado + ' grado — ' + tituloBase.split(' — ')[0];
 
     els.hero.classList.add('compacto');
     document.documentElement.style.setProperty('--hero-accent', sala.color_dark || '#0b7d8e');
