@@ -35,7 +35,7 @@
   gap: 0.45rem;
 }
 .qr-toolbar-links .btn {
-  min-height: 40px;
+  min-height: 44px;
   background: rgba(255, 255, 255, 0.12);
   border-color: rgba(255, 255, 255, 0.28);
   color: #ffffff;
@@ -128,10 +128,17 @@
   font-weight: 700;
   font-size: 0.9rem;
   cursor: pointer;
+  min-height: 44px; /* toda la etiqueta es la zona táctil de la casilla */
 }
 .qr-check input {
-  width: 18px;
-  height: 18px;
+  width: 24px;
+  height: 24px;
+}
+/* ".qr-controls label" (más arriba) la deja en bloque: se centra casilla y texto dentro de los 44 px */
+.qr-controls .qr-check {
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 0;
 }
 
 /* ---------- Área de carteles ---------- */
