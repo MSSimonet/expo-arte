@@ -535,7 +535,10 @@
     }
   }
 
+  var focoPrevio = null; // elemento que tenía el foco al abrir el visor (para devolvérselo al cerrar)
+
   function openVisor(idx) {
+    if (!els.visor.classList.contains('abierto')) focoPrevio = document.activeElement;
     showObraInVisor(idx);
     els.visor.classList.add('abierto');
     document.body.style.overflow = 'hidden';
@@ -543,9 +546,32 @@
   }
 
   function closeVisor() {
+    var estabaAbierto = els.visor.classList.contains('abierto');
     els.visor.classList.remove('abierto');
     document.body.style.overflow = '';
     liberarVideoVisor();
+    if (estabaAbierto && focoPrevio && focoPrevio.isConnected && typeof focoPrevio.focus === 'function') {
+      focoPrevio.focus({ preventScroll: true });
+    }
+    focoPrevio = null;
+  }
+
+  /** Con el visor abierto, Tab y Shift+Tab dan la vuelta dentro del visor (no se escapan a la página de atrás). */
+  function mantenerFocoEnVisor(e) {
+    var foco = Array.prototype.filter.call(
+      els.visor.querySelectorAll('button, a[href], input, select, textarea, [tabindex]:not([tabindex="-1"])'),
+      function (el) { return !el.disabled && el.getClientRects().length > 0; }
+    );
+    if (!foco.length) return;
+    var primero = foco[0], ultimo = foco[foco.length - 1];
+    var actual = document.activeElement;
+    if (e.shiftKey && (actual === primero || !els.visor.contains(actual))) {
+      e.preventDefault();
+      ultimo.focus();
+    } else if (!e.shiftKey && (actual === ultimo || !els.visor.contains(actual))) {
+      e.preventDefault();
+      primero.focus();
+    }
   }
 
   function stepVisor(delta) {
@@ -672,6 +698,7 @@
     document.addEventListener('keydown', function (e) {
       if (!els.visor.classList.contains('abierto')) return;
       if (e.key === 'Escape') closeVisor();
+      if (e.key === 'Tab') mantenerFocoEnVisor(e);
       if (e.key === 'ArrowLeft') stepVisor(-1);
       if (e.key === 'ArrowRight') stepVisor(1);
     });
