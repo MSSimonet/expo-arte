@@ -14,26 +14,27 @@
 
   var selectedIds = { general: true, 1: true, 2: true, 3: true, 4: true, 5: true, 6: true, 7: true };
 
+  // Carteles terminados (imagen completa con su QR): el general es vertical, los de grado son horizontales.
   var QR_IMAGE_MAP = {
-    general: 'QR/qr_general.png',
-    1: 'QR/qr_1ro.png',
-    2: 'QR/qr_2do.png',
-    3: 'QR/qr_3ro.png',
-    4: 'QR/qr_4to.png',
-    5: 'QR/qr_5to.png',
-    6: 'QR/qr_6to.png',
-    7: 'QR/qr_7mo.png'
+    general: 'QR/cartel-general.jpg',
+    1: 'QR/cartel-1.jpg',
+    2: 'QR/cartel-2.jpg',
+    3: 'QR/cartel-3.jpg',
+    4: 'QR/cartel-4.jpg',
+    5: 'QR/cartel-5.jpg',
+    6: 'QR/cartel-6.jpg',
+    7: 'QR/cartel-7.jpg'
   };
 
   var QR_DOWNLOAD_MAP = {
-    general: 'qr_general.png',
-    1: 'qr_1ro.png',
-    2: 'qr_2do.png',
-    3: 'qr_3ro.png',
-    4: 'qr_4to.png',
-    5: 'qr_5to.png',
-    6: 'qr_6to.png',
-    7: 'qr_7mo.png'
+    general: 'cartel-general.jpg',
+    1: 'cartel-1.jpg',
+    2: 'cartel-2.jpg',
+    3: 'cartel-3.jpg',
+    4: 'cartel-4.jpg',
+    5: 'cartel-5.jpg',
+    6: 'cartel-6.jpg',
+    7: 'cartel-7.jpg'
   };
 
   function escapeHtml(str) {
@@ -65,9 +66,7 @@
       cards.push({
         key: 'general',
         title: 'Toda la muestra',
-        subtitle: '1° a 7° grado · Muestra de arte',
-        hint: 'Escaneá el código con tu celular para recorrer todas las salas de la exposición.',
-        color: '#14532f',
+        orient: 'v',
         qrSrc: QR_IMAGE_MAP.general,
         filename: QR_DOWNLOAD_MAP.general
       });
@@ -78,11 +77,9 @@
       cards.push({
         key: 'sala-' + s.id,
         title: s.grado + ' grado',
-        subtitle: s.nombre,
-        hint: 'Escaneá el código con tu celular para ver las obras de ' + s.grado + ' grado y recorrer el resto de la muestra.',
-        color: s.color_dark,
-        qrSrc: QR_IMAGE_MAP[s.id] || ('QR/qr_' + s.id + '.png'),
-        filename: QR_DOWNLOAD_MAP[s.id] || ('qr_sala_' + s.id + '.png')
+        orient: 'h',
+        qrSrc: QR_IMAGE_MAP[s.id] || ('QR/cartel-' + s.id + '.jpg'),
+        filename: QR_DOWNLOAD_MAP[s.id] || ('cartel-' + s.id + '.jpg')
       });
     });
 
@@ -93,21 +90,12 @@
 
     var html = '';
     cards.forEach(function (c, i) {
-      html += '<article class="qr-poster" style="--poster-color:' + escapeHtml(c.color) + '">'
-        + '<header class="qr-poster-band">'
-        + '<div class="qr-poster-school">' + escapeHtml(global.EXPO_CONFIG ? global.EXPO_CONFIG.schoolName : '') + '</div>'
-        + '<h2 class="qr-poster-title">' + escapeHtml(global.EXPO_CONFIG ? global.EXPO_CONFIG.expoTitle : 'Exposición de Arte') + '</h2>'
-        + '</header>'
-        + '<div class="qr-poster-body">'
-        + '<div class="qr-poster-grade">' + escapeHtml(c.title) + '</div>'
-        + '<div class="qr-poster-shift">' + escapeHtml(c.subtitle) + '</div>'
-        + '<div class="qr-code-box"><img src="' + escapeHtml(c.qrSrc) + '" alt="Código QR para ' + escapeHtml(c.title) + '" loading="eager" /></div>'
-        + '<p class="qr-poster-hint">' + escapeHtml(c.hint) + '</p>'
-        + '<div class="qr-poster-date">' + escapeHtml(global.EXPO_CONFIG ? global.EXPO_CONFIG.expoDate : '') + '</div>'
+      html += '<article class="qr-poster qr-poster-' + c.orient + '">'
+        + '<img class="qr-poster-img" src="' + escapeHtml(c.qrSrc) + '" alt="Cartel con código QR: ' + escapeHtml(c.title) + '" loading="eager" decoding="async" />'
         + '<div class="qr-poster-actions">'
-        + '<button type="button" class="btn btn-primary" data-dl-qr="' + i + '">Descargar código QR</button>'
+        + '<button type="button" class="btn btn-primary" data-dl-qr="' + i + '">Descargar cartel</button>'
         + '</div>'
-        + '</div></article>';
+        + '</article>';
     });
     els.wrap.innerHTML = html;
 
