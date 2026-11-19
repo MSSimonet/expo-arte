@@ -314,7 +314,7 @@
       global.setSupabaseOverride(els.sbUrl.value, els.sbKey.value);
       var creds = global.getSupabaseCredentials();
       if (!creds.valid) {
-        showToast('Revisá el formato de la URL (https://....supabase.co) y la Anon Key.', true);
+        showToast('Revisá el formato de la URL (https://....supabase.co) y la Publishable / anon key.', true);
         return;
       }
       state.session = await global.ExpoStore.getSession();
