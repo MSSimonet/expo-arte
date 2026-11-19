@@ -478,11 +478,15 @@ main {
     --fs-frase-esc: clamp(1.25rem, 0.75rem + 0.8vw, 1.5rem);   /* 20 → 24 px */
   }
   .enc-listo .sala-escudo::after { display: none; }
+  /* La imagen trae una franja casi blanca de 9 px (columnas 1591 a 1599 de 1600) pegada al borde derecho: se agranda
+     el ancho lo justo para que esa franja quede afuera y el contenedor la recorta. El borde izquierdo no se mueve. */
+  .sala-escudo { overflow: hidden; }
   .sala-escudo-fondo {
     inset: 0;
-    width: 100%;
+    width: calc(100% * 1600 / 1591);
+    max-width: none;
     height: 100%;
-    object-fit: cover;
+    object-fit: fill;
     object-position: 50% 50%;
   }
   .sala-escudo-img { height: min(calc(var(--h-esc) * 0.8), 326px); }   /* 326 px = alto original del escudo */
