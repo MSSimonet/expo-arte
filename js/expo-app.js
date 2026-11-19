@@ -254,7 +254,7 @@
       var pixel = 'data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=';
       html += '<div class="sala-encabezado' + (desc ? '' : ' sin-frase') + '">'
         + '<h2 class="sala-escudo">'
-        + '<img class="sala-escudo-fondo" src="' + (primeraVisible ? pixel + '" data-src="' + srcFondo : srcFondo) + '" alt="" width="' + (esEscritorio ? 1600 : 760) + '" height="' + (esEscritorio ? 541 : 258) + '"' + cargaImg + ' />'
+        + '<img class="sala-escudo-fondo" src="' + (primeraVisible ? pixel + '" data-src="' + srcFondo : srcFondo) + '" alt="" width="' + (esEscritorio ? 1600 : 760) + '" height="' + (esEscritorio ? 430 : 258) + '"' + cargaImg + ' />'
         + '<img class="sala-escudo-img" src="' + (primeraVisible ? pixel + '" data-src="' + srcEscudo : srcEscudo) + '" alt="Escudo de ' + escapeHtml(tituloNombre(sala.nombre)) + '" width="480" height="326"' + cargaImg + ' />'
         + '</h2>'
         + '<div class="sala-cartel">' + (desc ? '<p class="sala-cartel-frase">' + escapeHtml(desc) + '</p>' : '') + '</div>'
@@ -321,7 +321,7 @@
   }
 
   var FONDO_BASE = 'assets/escudos/fondo-acuarela.webp?v=1';
-  var FONDO_ANCHO = 'assets/escudos/fondo-sala.webp?v=1';
+  var FONDO_ANCHO = 'assets/escudos/fondo-sala-ancho.webp?v=1';
 
   /** Si la ventana cruza los 1024 px, cambia el fondo del escudo por el que corresponde (solo los ya cargados). */
   function vigilarFondoAncho() {
@@ -331,7 +331,7 @@
       Array.prototype.forEach.call(els.salasMain.querySelectorAll('img.sala-escudo-fondo'), function (img) {
         var destino = mq.matches ? FONDO_ANCHO : FONDO_BASE;
         var ancho = mq.matches ? 1600 : 760;
-        var alto = mq.matches ? 541 : 258;
+        var alto = mq.matches ? 430 : 258;
         if (img.hasAttribute('data-src')) { img.setAttribute('data-src', destino); }
         else if (img.getAttribute('src') !== destino) { img.src = destino; }
         img.width = ancho; img.height = alto;

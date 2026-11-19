@@ -460,14 +460,21 @@ main {
 .sala-encabezado.sin-frase .sala-cartel { display: none; }
 .sala.destacada .sala-encabezado { filter: none; }
 
-/* ---------- Encabezado de sala en escritorio (desde 1024 px; por debajo no cambia nada) ---------- */
-/* En escritorio el fondo del escudo es la acuarela con su marco ornamentado (fondo-sala.webp, 3406x1152 de origen):
-   el marco ya viene en la imagen, así que no se superpone el marco fino del celular. */
+/* ---------- Sala en escritorio (desde 1024 px; por debajo no cambia nada) ---------- */
+/* El contenedor llega casi al borde de la ventana: margen lateral de 40 a 70 px y tope de 1600 px de contenido.
+   El fondo del escudo (fondo-sala-ancho.webp, 1600x430) es la acuarela con marco ornamentado ensanchada sin tocar las
+   esquinas ni el adorno central; el marco ya viene en la imagen, así que no se superpone el marco fino del celular. */
 @media (min-width: 1024px) {
+  main {
+    --margen-sala: clamp(40px, 3.2vw, 70px);
+    max-width: calc(1600px + 2 * var(--margen-sala));
+    padding-left: var(--margen-sala);
+    padding-right: var(--margen-sala);
+  }
   .sala-encabezado {
-    width: 100%;                          /* mismo ancho que la zona de cuadros; la imagen se ve entera, con su marco */
+    width: 100%;
     container-type: inline-size;          /* 100cqw = ancho del encabezado: el alto sigue la proporción de la imagen */
-    --h-esc: calc(100cqw * 1152 / 3406);
+    --h-esc: calc(100cqw * 430 / 1600);
     --fs-frase-esc: clamp(1.25rem, 0.75rem + 0.8vw, 1.5rem);   /* 20 → 24 px */
   }
   .enc-listo .sala-escudo::after { display: none; }
@@ -478,7 +485,7 @@ main {
     object-fit: cover;
     object-position: 50% 50%;
   }
-  .sala-escudo-img { height: calc(var(--h-esc) * 0.82); }
+  .sala-escudo-img { height: min(calc(var(--h-esc) * 0.8), 326px); }   /* 326 px = alto original del escudo */
   .sala-cartel-frase {
     max-width: 60ch;                  /* renglones de lectura cómoda, centrados dentro del cartel */
     font-size: var(--fs-frase-esc);
@@ -875,6 +882,57 @@ main {
   color: var(--ink-soft);
   font-weight: 700;
   margin-top: var(--sp-4);
+}
+
+/* ---------- Galería de escritorio: más ancha, filas centradas, sombra mínima y pared de color (>= 1024 px) ---------- */
+@media (min-width: 1024px) {
+  .galeria {
+    --cols: 4;
+    --sep-x: 36px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;            /* la última fila queda centrada, sin huecos raros */
+    align-items: center;                /* cada fila comparte su línea de colgado */
+    gap: 60px var(--sep-x);
+    padding: 48px 12px 56px;
+  }
+  .obra-card { flex: 0 0 calc((100% - (var(--cols) - 1) * var(--sep-x) - 1px) / var(--cols)); min-width: 0; }
+  .esq-galeria { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 60px 36px; padding: 48px 12px 56px; }
+  /* Sombra mínima en dos capas: una pegada y corta, otra apenas más abierta y muy tenue */
+  .obra-trigger .lienzo {
+    box-shadow:
+      0 1px 1px rgba(30, 22, 14, 0.34),
+      0 3px 8px -2px rgba(30, 22, 14, 0.12);
+  }
+}
+@media (min-width: 1500px) {
+  .galeria { --cols: 5; }
+  .esq-galeria { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+}
+
+/* Pared de escritorio: tono oscuro y apagado del color de cada grado, con el mismo ombré */
+@media (min-width: 1024px) {
+  .sala {
+    --pw-a: color-mix(in srgb, var(--ombre-fin) 24%, #26211c);
+    --pw-b: color-mix(in srgb, var(--ombre-fin) 42%, #161310);
+  }
+  .sala::before {
+    background: linear-gradient(to bottom,
+      var(--pw-a) 0%,
+      color-mix(in srgb, var(--pw-b) 2%, var(--pw-a)) 12%,
+      color-mix(in srgb, var(--pw-b) 8%, var(--pw-a)) 24%,
+      color-mix(in srgb, var(--pw-b) 18%, var(--pw-a)) 36%,
+      color-mix(in srgb, var(--pw-b) 32%, var(--pw-a)) 48%,
+      color-mix(in srgb, var(--pw-b) 48%, var(--pw-a)) 60%,
+      color-mix(in srgb, var(--pw-b) 64%, var(--pw-a)) 72%,
+      color-mix(in srgb, var(--pw-b) 80%, var(--pw-a)) 84%,
+      color-mix(in srgb, var(--pw-b) 94%, var(--pw-a)) 94%,
+      var(--pw-b) 100%);
+  }
+  .sala::after {   /* zócalo sobre pared oscura: crema más apagado y sombra más marcada */
+    background: linear-gradient(to bottom, #ece3cf, #cfc3a8);
+    box-shadow: 0 -7px 12px -6px rgba(0, 0, 0, 0.55);
+  }
 }
 
 /* ---------- Libro de visitas / Mensajes de las familias ---------- */
