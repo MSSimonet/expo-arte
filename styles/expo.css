@@ -1409,12 +1409,14 @@ footer {
 }
 .visor-acciones {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  /* 2 columnas; si la letra es muy grande (9rem no entra dos veces) pasan a una sola, en vez de salirse de la pantalla */
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr));
   gap: var(--sp-2);
   margin-top: var(--sp-4);
 }
 .visor-acciones .btn {
   min-height: 48px;
+  min-width: 0;
 }
 .visor-acciones .btn-wa,
 .visor-acciones .btn-primary {
