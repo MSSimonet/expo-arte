@@ -254,7 +254,7 @@
       var primeraVisible = state.qrSalaId ? isHighlighted : sala.id === orderedSalas[0].id;
       // En escritorio (>= 1024 px) el fondo es la acuarela con marco ornamentado de 1600 px; en pantallas menores, el de siempre.
       var esEscritorio = !!(global.matchMedia && global.matchMedia('(min-width: 1024px)').matches);
-      var srcFondo = esEscritorio ? FONDO_ANCHO : FONDO_BASE, srcEscudo = 'assets/escudos/escudo-' + sala.id + '.webp?v=2';
+      var srcFondo = esEscritorio ? FONDO_ANCHO : FONDO_BASE, srcEscudo = 'assets/escudos/' + (ESCUDO_CORREGIDO[sala.id] || 'escudo-' + sala.id + '.webp?v=2');
       var cargaImg = primeraVisible ? ' fetchpriority="high" decoding="async"' : ' loading="lazy" decoding="async"';
       var pixel = 'data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=';
       html += '<div class="sala-encabezado' + (desc ? '' : ' sin-frase') + '">'
@@ -327,6 +327,8 @@
     liberarEncabezado();
   }
 
+  // Escudos con el texto corregido (archivo nuevo; el original no se toca). 3°: "TERCERO GRADO" decía mal, ahora "TERCER GRADO".
+  var ESCUDO_CORREGIDO = { 3: 'escudo-3-tercer.webp?v=1' };
   var FONDO_BASE = 'assets/escudos/fondo-acuarela.webp?v=1';
   var FONDO_ANCHO = 'assets/escudos/fondo-sala-ancho.webp?v=1';
 
