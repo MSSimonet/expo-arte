@@ -610,9 +610,9 @@ main {
   background: rgba(255, 255, 255, 0.55);
 }
 
-/* ---------- Galería de obras: sala de museo con pared en degradado ---------- */
-/* Cada sala es una pared de ancho completo: casi blanca arriba y cada vez más saturada con el color del
-   grado hacia abajo (--ombre-fin). Solo gradientes CSS: sin imágenes, filter ni backdrop-filter.
+/* ---------- Galería de obras: sala de museo con pared lisa ---------- */
+/* Cada sala es una pared de ancho completo, de un solo color que sale del color del grado (--ombre-fin).
+   Solo colores CSS: sin imágenes, degradés, filter ni backdrop-filter. El zócalo del pie sí lleva un degradé de 28 px.
    Los valores finales se fijan aquí (no dependen de --sala-N-soft, que en modo oscuro se vuelve oscuro). */
 :root { --pared-alta: #fbfaf7; --ombre-fin: #12a5b4; }
 .sala-1, .c1, body[data-sala="1"], .visor[data-sala-visor="1"] { --ombre-fin: #12a5b4; } /* turquesa */
@@ -645,26 +645,16 @@ main {
   z-index: -1;
   pointer-events: none;
 }
+/* Pared lisa: un solo color por sala (antes un degradé de arriba a abajo). Es el promedio del degradé anterior, así que cada sala
+   conserva su tono: en celular, 40 % del color del grado sobre la pared clara. Sin color-mix queda la pared clara. */
+.sala { --pared-lisa: var(--pared-alta); }
+@supports (color: color-mix(in srgb, red 50%, blue)) {
+  .sala { --pared-lisa: color-mix(in srgb, var(--ombre-fin) 40%, var(--pared-alta)); }
+}
 .sala::before {
   top: 0;
   bottom: 0;
-  background: linear-gradient(to bottom, var(--pared-alta), var(--ombre-fin)); /* respaldo sin color-mix */
-}
-@supports (color: color-mix(in srgb, red 50%, blue)) {
-  .sala::before {
-    /* Curva suave (tipo smoothstep) con 10 paradas: sin bandas ni cortes visibles */
-    background: linear-gradient(to bottom,
-      var(--pared-alta) 0%,
-      color-mix(in srgb, var(--ombre-fin) 2%, var(--pared-alta)) 12%,
-      color-mix(in srgb, var(--ombre-fin) 8%, var(--pared-alta)) 24%,
-      color-mix(in srgb, var(--ombre-fin) 18%, var(--pared-alta)) 36%,
-      color-mix(in srgb, var(--ombre-fin) 32%, var(--pared-alta)) 48%,
-      color-mix(in srgb, var(--ombre-fin) 48%, var(--pared-alta)) 60%,
-      color-mix(in srgb, var(--ombre-fin) 64%, var(--pared-alta)) 72%,
-      color-mix(in srgb, var(--ombre-fin) 80%, var(--pared-alta)) 84%,
-      color-mix(in srgb, var(--ombre-fin) 94%, var(--pared-alta)) 94%,
-      var(--ombre-fin) 100%);
-  }
+  background: var(--pared-lisa);
 }
 /* Zócalo: franja fina y clara al pie, con una sombra suave encima */
 .sala::after {
@@ -917,24 +907,12 @@ main {
   .esq-galeria { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 }
 
-/* Pared de escritorio: tono oscuro y apagado del color de cada grado, con el mismo ombré */
+/* Pared de escritorio: tono oscuro y apagado del color de cada grado, liso. Es el promedio del degradé anterior
+   (de 24 % a 42 % del color del grado sobre marrón oscuro): 31 % del color del grado sobre #211c18. */
 @media (min-width: 1024px) {
-  .sala {
-    --pw-a: color-mix(in srgb, var(--ombre-fin) 24%, #26211c);
-    --pw-b: color-mix(in srgb, var(--ombre-fin) 42%, #161310);
-  }
-  .sala::before {
-    background: linear-gradient(to bottom,
-      var(--pw-a) 0%,
-      color-mix(in srgb, var(--pw-b) 2%, var(--pw-a)) 12%,
-      color-mix(in srgb, var(--pw-b) 8%, var(--pw-a)) 24%,
-      color-mix(in srgb, var(--pw-b) 18%, var(--pw-a)) 36%,
-      color-mix(in srgb, var(--pw-b) 32%, var(--pw-a)) 48%,
-      color-mix(in srgb, var(--pw-b) 48%, var(--pw-a)) 60%,
-      color-mix(in srgb, var(--pw-b) 64%, var(--pw-a)) 72%,
-      color-mix(in srgb, var(--pw-b) 80%, var(--pw-a)) 84%,
-      color-mix(in srgb, var(--pw-b) 94%, var(--pw-a)) 94%,
-      var(--pw-b) 100%);
+  .sala { --pared-lisa: #2b2622; } /* respaldo sin color-mix: pared oscura neutra */
+  @supports (color: color-mix(in srgb, red 50%, blue)) {
+    .sala { --pared-lisa: color-mix(in srgb, var(--ombre-fin) 31%, #211c18); }
   }
   .sala::after {   /* zócalo sobre pared oscura: crema más apagado y sombra más marcada */
     background: linear-gradient(to bottom, #ece3cf, #cfc3a8);
