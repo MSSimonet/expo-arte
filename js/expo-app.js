@@ -258,7 +258,7 @@
       var cargaImg = primeraVisible ? ' fetchpriority="high" decoding="async"' : ' loading="lazy" decoding="async"';
       var pixel = 'data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=';
       html += '<div class="sala-encabezado' + (desc ? '' : ' sin-frase') + '">'
-        + '<h2 class="sala-escudo">'
+        + '<h2 class="sala-escudo" aria-label="Sala de ' + escapeHtml(sala.grado) + ' grado">'
         + '<img class="sala-escudo-fondo" src="' + (primeraVisible ? pixel + '" data-src="' + srcFondo : srcFondo) + '" alt="" width="' + (esEscritorio ? 1600 : 760) + '" height="' + (esEscritorio ? 430 : 258) + '"' + cargaImg + ' />'
         + '<img class="sala-escudo-img" src="' + (primeraVisible ? pixel + '" data-src="' + srcEscudo : srcEscudo) + '" alt="Escudo de ' + escapeHtml(tituloNombre(sala.nombre)) + '" width="480" height="326"' + cargaImg + ' />'
         + '</h2>'
