@@ -740,11 +740,13 @@
         }
       })).observe(el.salas, { childList: true, subtree: true, attributes: true, attributeFilter: ['aria-pressed'], attributeOldValue: true });
 
+      // subtree: el texto de un chip también cambia ("Mensajes" → "Mensajes (3)") y con él el ancho de la fila y la posición
+      // de los demás chips (están centrados); sin esto la píldora del grado actual quedaba corrida unos píxeles.
       new MutationObserver(seguro(function () {
         invalidarChips();
         asegurarPildora();
         decidirObjetivo(false, true);
-      })).observe(el.chips, { childList: true });
+      })).observe(el.chips, { childList: true, subtree: true });
       el.chips.addEventListener('scroll', function () { chipsScrollLeft = el.chips.scrollLeft; }, { passive: true });
       if (doc.fonts && doc.fonts.ready) {
         doc.fonts.ready.then(seguro(function () {
