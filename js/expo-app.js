@@ -831,15 +831,16 @@
     if (r[0]) aplicarSalas(r[0].data);
     if (r[2]) aplicarLikes(r[2].data);
 
-    state.mensajesCargados = true;
+    var chipMensajes = els.chipsSalas.querySelector('.c-msg');
     if (r[1] && !r[1].fallo) {
+      state.mensajesCargados = true;
       state.mensajes = r[1].data;
       renderMensajes();
+      if (chipMensajes) chipMensajes.textContent = 'Mensajes (' + state.mensajes.length + ')';
     } else {
+      // Si no se pudieron leer, no se sabe cuántos hay: la barra dice "Mensajes" y no "Mensajes (0)".
       els.msgLista.innerHTML = '<div class="estado-vacio">No se pudieron cargar los mensajes. Revisá la conexión y volvé a abrir la página.</div>';
     }
-    var chipMensajes = els.chipsSalas.querySelector('.c-msg');
-    if (chipMensajes) chipMensajes.textContent = 'Mensajes (' + state.mensajes.length + ')';
   }
 
   async function init() {
