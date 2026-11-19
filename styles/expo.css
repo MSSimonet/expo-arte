@@ -1059,13 +1059,14 @@ main {
   color: var(--ink-mute);
   font-weight: 700;
   margin-bottom: var(--sp-2);
+  overflow-wrap: anywhere;
 }
 .msg-texto {
   margin: 0;
   font-size: var(--fs-lectura);
   line-height: 1.55;
   color: var(--ink);
-  overflow-wrap: break-word;
+  overflow-wrap: anywhere;
 }
 .msg-fecha {
   margin-top: var(--sp-3);
